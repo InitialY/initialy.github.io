@@ -14,6 +14,10 @@ async function loadPyodideAndPackages() {
 }
 
 async function handleFileUpload() {
+    // Show loading indicator
+    const loadingIndicator = document.getElementById('loading');
+    loadingIndicator.classList.remove('hidden');
+
     const fileInput = document.getElementById('fileInput');
     const file = fileInput.files[0];
 
@@ -60,12 +64,18 @@ async function handleFileUpload() {
         )
         list(stream)
     `);
+    // Hide loading indicator
+    loadingIndicator.classList.add('hidden');
+
     const uint8Array = new Uint8Array(excelFileData);
+    
     // Create a Blob from the Excel file data
     const blob = new Blob([uint8Array], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-
-    // Create a download link
+    
     const downloadLink = document.getElementById("downloadLink");
+    downloadLink.classList.remove('hidden');
+    
+    // Create a download link
     downloadLink.href = URL.createObjectURL(blob);
     downloadLink.download = jsExcelFileName;
     downloadLink.style.display = 'block'; // Show the link

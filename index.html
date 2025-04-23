@@ -2,6 +2,7 @@
 <html>
   <head>
       <script src="https://cdn.jsdelivr.net/pyodide/v0.27.5/full/pyodide.js"></script>
+      <link rel="stylesheet" href="styles.css">
   </head>
   <body>
     <input type="file" id="fileInput" accept=".zip" />
@@ -10,7 +11,8 @@
     <input type="number" id="totalPoints" min="0" max="1400" step="1"/>
     <input type="checkbox" id="isTeam" />
     <button id="uploadButton">Upload and Store Images</button>
-    <a id="downloadLink" style="display:none;">Download Excel File</a>
+    <div id="loading" class="hidden">Loading...</div>
+    <a id="downloadLink" class="hidden" href="#" download>Download Excel File</a>
     <script src="script.js"></script>
   </body>
 </html>
