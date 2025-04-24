@@ -35,22 +35,41 @@ function validateTotalPointsInput() {
     }
 }
 
+// Validate file input
+function validateFileInput() {
+    const fileInput = document.getElementById('fileInput');
+    const fileInputMessage = document.getElementById('validateFileInput');
+    if (fileInput?.files.length > 0) {
+        const file = fileInput.files[0];
+        const fileExtension = file.name.split('.').pop().toLowerCase();
+        const fileType = file.type;
+        if (fileExtension === 'zip' || fileType === 'application/zip' || fileType === 'application/x-zip-compressed') {
+            return file;
+        } else {
+            fileInputMessage.textContent = 'The selected file is not a zip file.';
+            fileInputMessage.style.color = 'red';
+            return;
+        }
+    } else {
+        fileInputMessage.textContent = 'No file selected.';
+        fileInputMessage.style.color = 'red';
+        return;
+    }
+}
+
 async function handleFileUpload() {
+    // Validation
+    validateTournamentShortNameInput();
+    validateTotalPointsInput();
+    const file = validateFileInput();
+
+    if (!file){
+        return;
+    }
+
     // Show loading indicator
     const loadingIndicator = document.getElementById('loading');
     loadingIndicator.classList.remove('hidden');
-
-    // Validation
-    validateTournamentShortNameInput()
-    validateTotalPointsInput()
-    
-    const fileInput = document.getElementById('fileInput');
-    const file = fileInput.files[0];
-
-    if (!file) {
-        alert("Please select a ZIP file.");
-        return;
-    }
 
     const pyodide_js = await loadPyodideAndPackages();
     const zipData = await file.arrayBuffer();
@@ -92,11 +111,9 @@ async function handleFileUpload() {
     `);
     // Hide loading indicator
     loadingIndicator.classList.add('hidden');
-
-    const uint8Array = new Uint8Array(excelFileData);
     
     // Create a Blob from the Excel file data
-    const blob = new Blob([uint8Array], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const blob = new Blob([new Uint8Array(excelFileData)], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     
     const downloadLink = document.getElementById("downloadLink");
     downloadLink.classList.remove('hidden');
