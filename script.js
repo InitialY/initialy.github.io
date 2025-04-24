@@ -13,11 +13,37 @@ async function loadPyodideAndPackages() {
     return pyodide_js;
 }
 
+// Validate input for tournament short name
+function validateTournamentShortNameInput() {
+    const tournamentShortName = document.getElementById('tournamentShortName').value;
+    const tournamentShortNameMessage = document.getElementById('validateTournamentShortName');
+    // Regular expression to allow only letters (both uppercase and lowercase)
+    const regex = /^[A-Za-z]+$/;
+    if (!regex.test(tournamentShortName)) {
+        tournamentShortNameMessage.textContent = 'Invalid short name! Only letters are allowed.';
+        tournamentShortNameMessage.style.color = 'red';
+    }
+}
+
+// Validate input for total points
+function validateTotalPointsInput() {
+    const totalPoints = document.getElementById('totalPoints').value;
+    const totalPointsMessage = document.getElementById('validateTotalPoints');
+    if (totalPoints < 0 || totalPoints > 1400) {
+        totalPointsMessage.textContent = 'Invalid total points! Points should within 0 and 1400.';
+        totalPointsMessage.style.color = 'red'
+    }
+}
+
 async function handleFileUpload() {
     // Show loading indicator
     const loadingIndicator = document.getElementById('loading');
     loadingIndicator.classList.remove('hidden');
 
+    // Validation
+    validateTournamentShortNameInput()
+    validateTotalPointsInput()
+    
     const fileInput = document.getElementById('fileInput');
     const file = fileInput.files[0];
 

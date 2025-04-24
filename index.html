@@ -16,14 +16,16 @@
     <div>
       <label for="tournamentShortName">Short Name (Excel Sheet and Table name)</label>
       <input type="text" id="tournamentShortName" name="tournamentShortName"/>
+      <p id="validateTournamentShortName"></p>
     </div>
     <div>
       <label for="totalPoints">Total Points</label>
       <input type="number" id="totalPoints" min="0" max="1400" step="1" name="totalPoints"/>
+      <p id="validateTotalPoints"></p>
     </div>
     <div>
-      <label for="team">Team Tournament</label>
-      <input type="checkbox" id="isTeam" name="team"/>
+      <label for="isTeam">Team Tournament</label>
+      <input type="checkbox" id="isTeam" name="isTeam"/>
     </div>
     <button id="uploadButton">Upload and Store Images</button>
     <div id="loading" class="hidden">Loading...</div>
