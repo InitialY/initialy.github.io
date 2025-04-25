@@ -15,8 +15,8 @@ async function loadPyodideAndPackages() {
 
 // Validate input for tournament short name
 function validateTournamentShortNameInput() {
-    const tournamentShortName = document.getElementById('tournamentShortName').value;
-    const tournamentShortNameMessage = document.getElementById('validateTournamentShortName');
+    const tournamentShortName = document.getElementById('tournamentShortNameInput').value;
+    const tournamentShortNameMessage = document.getElementById('tournamentShortNameInputFeedback');
     // Regular expression to allow only letters (both uppercase and lowercase)
     const regex = /^[A-Za-z]+$/;
     if (!regex.test(tournamentShortName)) {
@@ -27,8 +27,8 @@ function validateTournamentShortNameInput() {
 
 // Validate input for total points
 function validateTotalPointsInput() {
-    const totalPoints = document.getElementById('totalPoints').value;
-    const totalPointsMessage = document.getElementById('validateTotalPoints');
+    const totalPoints = document.getElementById('totalPointsInput').value;
+    const totalPointsMessage = document.getElementById('totalPointsInputFeedback');
     if (totalPoints < 0 || totalPoints > 1400) {
         totalPointsMessage.textContent = 'Invalid total points! Points should within 0 and 1400.';
         totalPointsMessage.style.color = 'red'
@@ -38,7 +38,7 @@ function validateTotalPointsInput() {
 // Validate file input
 function validateFileInput() {
     const fileInput = document.getElementById('fileInput');
-    const fileInputMessage = document.getElementById('validateFileInput');
+    const fileInputMessage = document.getElementById('fileInputFeedback');
     if (fileInput?.files.length > 0) {
         const file = fileInput.files[0];
         const fileExtension = file.name.split('.').pop().toLowerCase();
@@ -95,16 +95,12 @@ async function handleFileUpload() {
         zipfile_path = os.path.join('/images', zipfile_names[0])
         
         # Call project entry point of the wheel
-        print(js.document.getElementById('tournamentName').value)
-        print(js.document.getElementById('tournamentShortName').value)
-        print(js.document.getElementById('totalPoints').value)
-        print(js.document.getElementById('isTeam').checked)
         stream = create_and_export_single_tournament(
             tournament_dir = zipfile_path,
-            tournament_name = js.document.getElementById('tournamentName').value,
-            short_name = js.document.getElementById('tournamentShortName').value,
-            total_points = js.document.getElementById('totalPoints').value,
-            is_team = js.document.getElementById('isTeam').checked,
+            tournament_name = js.document.getElementById('tournamentNameInput').value,
+            short_name = js.document.getElementById('tournamentShortNameInput').value,
+            total_points = js.document.getElementById('totalPointsInput').value,
+            is_team = js.document.getElementById('isTeamInput').checked,
             excel_file_name = "${jsExcelFileName}"
         )
         list(stream)
