@@ -7,34 +7,32 @@
 </head>
 
 <body>
-  <div>
+  <form id="createTournamentForm">
     <label for="fileInput">Drag or Select a .zip File containing .jpg Screenshots</label>
-    <input type="file" id="fileInput" accept=".zip" name="fileInput" required />
-    <span id="fileInputFeedback"></span>
-  </div>
-  <div>
+    <input type="file" id="fileInput" accept=".zip" name="fileInput" title="Only .zip files are allowed." required/>
+    <span id="fileInputFeedback" class="feedback"></span>
+
     <label for="tournamentNameInput">Tournament Name</label>
     <input type="text" id="tournamentNameInput" name="tournamentNameInput" />
-  </div>
-  <div>
+
     <label for="tournamentShortNameInput">Short Name (Excel Sheet and Table name)</label>
-    <input type="text" id="tournamentShortNameInput" name="tournamentShortNameInput"
-      title="The short name may only consist of letters" />
-    <span id="tournamentShortNameInputFeedback"></span>
-  </div>
-  <div>
+    <input type="text" id="tournamentShortNameInput" name="tournamentShortNameInput" pattern="^[A-Za-z_]+$"
+      title="Only letters and underscore are allowed." />
+    <span id="tournamentShortNameInputFeedback" class="feedback"></span>
+
     <label for="totalPointsInput">Total Points</label>
-    <input type="number" id="totalPointsInput" min="0" max="1400" step="1" name="totalPointsInput" />
-    <span id="totalPointsInputFeedback"></span>
-  </div>
-  <div>
+    <input type="number" id="totalPointsInput" min="0" max="1400" step="1" value="500" name="totalPointsInput" pattern="^[0-9]+$"
+      title="Only numbers are allowed." />
+    <span id="totalPointsInputFeedback" class="feedback"></span>
+
     <label for="isTeamInput">Team Tournament</label>
     <input type="checkbox" id="isTeamInput" name="isTeamInput" />
-  </div>
-  <button id="uploadButton">Upload and Store Images</button>
-  <div id="loading" class="hidden">Loading...</div>
-  <a id="downloadLink" class="hidden" href="#" download>Download Excel File</a>
-  <script src="script.js"></script>
+
+    <button type="submit" id="extractButton">Extract</button>
+  </form>
+  <div id="loading" class="hidden">Loading...
+    <a id="downloadLink" class="hidden" href="#" download>Download Excel File</a>
+    <script src="script.js"></script>
 </body>
 
 </html>

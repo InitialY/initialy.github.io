@@ -13,59 +13,13 @@ async function loadPyodideAndPackages() {
     return pyodide_js;
 }
 
-// Validate input for tournament short name
-function validateTournamentShortNameInput() {
-    const tournamentShortName = document.getElementById('tournamentShortNameInput').value;
-    const tournamentShortNameMessage = document.getElementById('tournamentShortNameInputFeedback');
-    // Regular expression to allow only letters (both uppercase and lowercase)
-    const regex = /^[A-Za-z]+$/;
-    if (!regex.test(tournamentShortName)) {
-        tournamentShortNameMessage.textContent = 'Invalid short name! Only letters are allowed.';
-        tournamentShortNameMessage.style.color = 'red';
-    }
-}
-
-// Validate input for total points
-function validateTotalPointsInput() {
-    const totalPoints = document.getElementById('totalPointsInput').value;
-    const totalPointsMessage = document.getElementById('totalPointsInputFeedback');
-    if (totalPoints < 0 || totalPoints > 1400) {
-        totalPointsMessage.textContent = 'Invalid total points! Points should within 0 and 1400.';
-        totalPointsMessage.style.color = 'red'
-    }
-}
-
-// Validate file input
-function validateFileInput() {
-    const fileInput = document.getElementById('fileInput');
-    const fileInputMessage = document.getElementById('fileInputFeedback');
-    if (fileInput?.files.length > 0) {
-        const file = fileInput.files[0];
-        const fileExtension = file.name.split('.').pop().toLowerCase();
-        const fileType = file.type;
-        if (fileExtension === 'zip' || fileType === 'application/zip' || fileType === 'application/x-zip-compressed') {
-            return file;
-        } else {
-            fileInputMessage.textContent = 'The selected file is not a zip file.';
-            fileInputMessage.style.color = 'red';
-            return;
-        }
-    } else {
-        fileInputMessage.textContent = 'No file selected.';
-        fileInputMessage.style.color = 'red';
-        return;
-    }
-}
-
 async function handleFileUpload() {
-    // Validation
-    validateTournamentShortNameInput();
-    validateTotalPointsInput();
-    const file = validateFileInput();
-
-    if (!file){
+    const fileInput = document.getElementById('fileInput');
+    // validateFileInput(fileInput);
+    if (fileInput.classList.contains('invalid')) {
         return;
     }
+    const file = fileInput?.files[0]
 
     // Show loading indicator
     const loadingIndicator = document.getElementById('loading');
@@ -121,4 +75,35 @@ async function handleFileUpload() {
     downloadLink.innerText = 'Download Excel File';
 }
 
-document.getElementById("uploadButton").addEventListener("click", handleFileUpload);
+function validateInput(input, checkStatement) {
+    if (checkStatement) {
+        input.classList.remove('invalid');
+        input.classList.add('valid');
+        input.nextElementSibling.textContent = '';
+    } else {
+        input.classList.remove('valid');
+        input.classList.add('invalid');
+        input.nextElementSibling.textContent = input.title;
+    }
+}
+
+function fileValidateInput(input) {
+    const file = input.files[0];
+    const isValid = file && (file.type === 'application/zip' || file.name.endsWith('.zip'));
+    validateInput(input, isValid);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const tournamentShortNameInput = document.getElementById("tournamentShortNameInput");
+    const totalPointsInput = document.getElementById("totalPointsInput");
+    const fileInput = document.getElementById("fileInput");
+
+    tournamentShortNameInput.addEventListener('input', () => validateInput(tournamentShortNameInput, tournamentShortNameInput.validity.valid));
+    totalPointsInput.addEventListener('input', () => validateInput(totalPointsInput, totalPointsInput.validity.valid));
+    fileInput.addEventListener('change', (event) => fileValidateInput(fileInput));
+});
+
+document.getElementById("createTournamentForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    handleFileUpload();
+});
