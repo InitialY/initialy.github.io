@@ -13,44 +13,55 @@ async function loadPyodideAndPackages() {
     return pyodide_js;
 }
 
-async function handleFileUpload() {
+function extractZipFiles(pyodide_js) {
+    return pyodide_js.runPythonAsync(`
+        import zipfile
+        import js
+        
+        # Extract the ZIP file
+        accepted_zipfiles = 0
+        with zipfile.ZipFile('/uploaded.zip', 'r') as zip_ref:
+            zipfile_names = zip_ref.namelist()
+            for file_name in zipfile_names:
+                if file_name.endswith('.jpg'):
+                    zip_ref.extract(file_name, '/images')
+                    accepted_zipfiles += 1
+        js.document.getElementById('extractFeedback').textContent = f"{accepted_zipfiles} of {len(zipfile_names)} files accepted."
+        accepted_zipfiles
+        `);
+}
+
+async function handleFileUpload() {   
     const fileInput = document.getElementById('fileInput');
     // validateFileInput(fileInput);
     if (fileInput.classList.contains('invalid')) {
         return;
     }
-    const file = fileInput?.files[0]
-
+    const file = fileInput.files[0];
+    const zipData = await file.arrayBuffer();
+    
     // Show loading indicator
     const loadingIndicator = document.getElementById('loading');
-    loadingIndicator.classList.remove('hidden');
+    loadingIndicator.classList.remove('hidden'); 
 
     const pyodide_js = await loadPyodideAndPackages();
-    const zipData = await file.arrayBuffer();
-
     // Write the ZIP file to the Pyodide virtual file system
     pyodide_js.FS.writeFile('/uploaded.zip', new Uint8Array(zipData));
 
+    const accepted_files = await extractZipFiles(pyodide_js);
+    if (accepted_files <= 0) {
+        return;
+    }
+    
     const jsExcelFileName = 'NinjalaTournamentStats.xlsx';
     // Now you can call a Python function to extract and process the images
     const excelFileData = await pyodide_js.runPythonAsync(`
-        import zipfile
-        import os
         from image_number_extraction.main import create_and_export_single_tournament
-        import io
         import js
 
-        # Extract the ZIP file
-        zipfile_names = []
-        with zipfile.ZipFile('/uploaded.zip', 'r') as zip_ref:
-            zip_ref.extractall('/images')
-            zipfile_names.extend(zip_ref.namelist())
-        
-        zipfile_path = os.path.join('/images', zipfile_names[0])
-        
         # Call project entry point of the wheel
         stream = create_and_export_single_tournament(
-            tournament_dir = zipfile_path,
+            tournament_dir = '/images',
             tournament_name = js.document.getElementById('tournamentNameInput').value,
             short_name = js.document.getElementById('tournamentShortNameInput').value,
             total_points = js.document.getElementById('totalPointsInput').value,
@@ -87,9 +98,9 @@ function validateInput(input, checkStatement) {
     }
 }
 
-function fileValidateInput(input) {
+function validateFileInput(input) {
     const file = input.files[0];
-    const isValid = file && (file.type === 'application/zip' || file.name.endsWith('.zip'));
+    const isValid = file && (file.type === 'application/zip' || file.name.endsWith('.zip')) && (file.size <= 50000000);
     validateInput(input, isValid);
 }
 
@@ -100,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     tournamentShortNameInput.addEventListener('input', () => validateInput(tournamentShortNameInput, tournamentShortNameInput.validity.valid));
     totalPointsInput.addEventListener('input', () => validateInput(totalPointsInput, totalPointsInput.validity.valid));
-    fileInput.addEventListener('change', (event) => fileValidateInput(fileInput));
+    fileInput.addEventListener('change', () => validateFileInput(fileInput));
 });
 
 document.getElementById("createTournamentForm").addEventListener("submit", async (event) => {
