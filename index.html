@@ -6,45 +6,57 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <form id="createTournamentForm">
-    <div class="form-row">
-      <label for="fileInput">Tournament Screenshots</label>
-      <div id="dropZone" class="drop-zone">
-        <span>Drag & drop your .zip file here or click to select</span>
-        <input type="file" id="fileInput" accept=".zip" name="fileInput" title="Only .zip files are allowed." required />
+  <div id="content">
+    <h1>Ninjala Tournament Statistics Creator</h1>
+    <form id="createTournamentForm">
+      <div class="form-row">
+        <label for="fileInput">Tournament Screenshots</label>
+        <div id="dropZone" class="drop-zone">
+          <span>Drag & drop your .zip file here or click to select</span>
+          <input type="file" id="fileInput" accept=".zip" name="fileInput" title="Only .zip files are allowed."
+            required />
+        </div>
+        <span id="fileInputFeedback" class="feedback"></span>
       </div>
-      <span id="fileInputFeedback" class="feedback"></span>
+      <div class="form-row">
+        <label for="tournamentNameInput">Tournament Name</label>
+        <input type="text" id="tournamentNameInput" name="tournamentNameInput"
+          placeholder="WNA Tours: Saizo Cup (Solo)" />
+      </div>
+      <div class="form-row">
+        <label for="tournamentShortNameInput">Short Name (Excel Sheet and Table name)</label>
+        <input type="text" id="tournamentShortNameInput" name="tournamentShortNameInput" pattern="^[A-Za-z_]+$"
+          title="Only letters and underscore are allowed." placeholder="saizo_solo" />
+        <span id="tournamentShortNameInputFeedback" class="feedback"></span>
+      </div>
+      <div class="form-row">
+        <label for="totalPointsInput">Total Points</label>
+        <input type="number" id="totalPointsInput" min="0" step="1" placeholder="500" name="totalPointsInput"
+          pattern="^[0-9]+$" title="Only numbers are allowed." />
+        <span id="totalPointsInputFeedback" class="feedback"></span>
+      </div>
+      <div class="form-row">
+        <label for="isTeamInput">
+          Team Tournament
+          <input type="checkbox" id="isTeamInput" name="isTeamInput" />
+        </label>
+      </div>
+      <div class="form-row">
+        <button type="submit" id="extractButton">Extract</button>
+      </div>
+    </form>
+    
+    <div id="loading" class="hidden">
+      <div class="loading-circle"></div>
+      <p>Loading...</p>
+      <p id="extractFeedback"></p>
     </div>
-    <div class="form-row">
-      <label for="tournamentNameInput">Tournament Name</label>
-      <input type="text" id="tournamentNameInput" name="tournamentNameInput"
-        placeholder="WNA Tours: Saizo Cup (Solo)" />
+    
+    <div id="downloadLink" class="hidden">
+      <p>Tournament Statistics successfully created!</p>
+      <a href="#" download>Download Excel File</a>
     </div>
-    <div class="form-row">
-      <label for="tournamentShortNameInput">Short Name (Excel Sheet and Table name)</label>
-      <input type="text" id="tournamentShortNameInput" name="tournamentShortNameInput" pattern="^[A-Za-z_]+$"
-        title="Only letters and underscore are allowed." placeholder="saizo_solo" />
-      <span id="tournamentShortNameInputFeedback" class="feedback"></span>
-    </div>
-    <div class="form-row">
-      <label for="totalPointsInput">Total Points</label>
-      <input type="number" id="totalPointsInput" min="0" step="1" placeholder="500" name="totalPointsInput"
-        pattern="^[0-9]+$" title="Only numbers are allowed." />
-      <span id="totalPointsInputFeedback" class="feedback"></span>
-    </div>
-    <div class="form-row">
-      <label for="isTeamInput">
-        Team Tournament
-        <input type="checkbox" id="isTeamInput" name="isTeamInput" />
-      </label>
-    </div>
-    <div class="form-row">
-      <button type="submit" id="extractButton">Extract</button>
-    </div>
-  </form>
-  <div id="loading" class="hidden">Loading...</div>
-  <span id="extractFeedback"></span>
-  <a id="downloadLink" class="hidden" href="#" download>Download Excel File</a>
+  </div>
   <script src="script.js"></script>
 </body>
 </html>

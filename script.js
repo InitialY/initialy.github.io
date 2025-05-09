@@ -34,11 +34,14 @@ function extractZipFiles(pyodide_js) {
         `);
 }
 
-async function processData() {
+async function processData(form) {
     if (!selectedFile) {
         return;
     }
     const zipData = await selectedFile.arrayBuffer();
+
+    // Hide the form
+    form.classList.add('hidden');
 
     // Show loading indicator
     const loadingIndicator = document.getElementById('loading');
@@ -70,20 +73,21 @@ async function processData() {
         )
         list(stream)
     `);
-    // Hide loading indicator
-    loadingIndicator.classList.add('hidden');
 
     // Create a Blob from the Excel file data
     const blob = new Blob([new Uint8Array(excelFileData)], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-
-    const downloadLink = document.getElementById("downloadLink");
-    downloadLink.classList.remove('hidden');
+    
+    // Hide loading indicator
+    loadingIndicator.classList.add('hidden');
 
     // Create a download link
-    downloadLink.href = URL.createObjectURL(blob);
-    downloadLink.download = jsExcelFileName;
-    downloadLink.style.display = 'block'; // Show the link
-    downloadLink.innerText = 'Download Excel File';
+    const downloadLink = document.getElementById("downloadLink");
+    downloadLink.querySelector('a').href = URL.createObjectURL(blob);
+    downloadLink.querySelector('a').download = jsExcelFileName;
+    downloadLink.classList.remove('hidden');
+
+    // downloadLink.style.display = 'block'; // Show the link
+    // downloadLink.innerText = 'Download Excel File';
 }
 
 function validateInput(input) {
@@ -181,5 +185,5 @@ function handleDrop(e) {
 
 document.getElementById("createTournamentForm").addEventListener("submit", async (event) => {
     event.preventDefault();
-    processData();
+    processData(event.target);
 });
