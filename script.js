@@ -20,29 +20,29 @@ function extractZipFiles(pyodide_js) {
         
         # Extract the ZIP file
         accepted_zipfiles = 0
+        num_non_files = 0
         with zipfile.ZipFile('/uploaded.zip', 'r') as zip_ref:
             zipfile_names = zip_ref.namelist()
             for file_name in zipfile_names:
-                if file_name.endswith('.jpg'):
+                if file_name.endswith('/'):
+                    num_non_files += 1
+                elif file_name.endswith('.jpg'):
                     zip_ref.extract(file_name, '/images')
                     accepted_zipfiles += 1
-        js.document.getElementById('extractFeedback').textContent = f"{accepted_zipfiles} of {len(zipfile_names)} files accepted."
+        js.document.getElementById('extractFeedback').textContent = f"{accepted_zipfiles} of {len(zipfile_names)-num_non_files} file(s) accepted."
         accepted_zipfiles
         `);
 }
 
-async function handleFileUpload() {   
-    const fileInput = document.getElementById('fileInput');
-    // validateFileInput(fileInput);
-    if (fileInput.classList.contains('invalid')) {
+async function processData() {
+    if (!selectedFile) {
         return;
     }
-    const file = fileInput.files[0];
-    const zipData = await file.arrayBuffer();
-    
+    const zipData = await selectedFile.arrayBuffer();
+
     // Show loading indicator
     const loadingIndicator = document.getElementById('loading');
-    loadingIndicator.classList.remove('hidden'); 
+    loadingIndicator.classList.remove('hidden');
 
     const pyodide_js = await loadPyodideAndPackages();
     // Write the ZIP file to the Pyodide virtual file system
@@ -52,7 +52,7 @@ async function handleFileUpload() {
     if (accepted_files <= 0) {
         return;
     }
-    
+
     const jsExcelFileName = 'NinjalaTournamentStats.xlsx';
     // Now you can call a Python function to extract and process the images
     const excelFileData = await pyodide_js.runPythonAsync(`
@@ -72,13 +72,13 @@ async function handleFileUpload() {
     `);
     // Hide loading indicator
     loadingIndicator.classList.add('hidden');
-    
+
     // Create a Blob from the Excel file data
     const blob = new Blob([new Uint8Array(excelFileData)], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    
+
     const downloadLink = document.getElementById("downloadLink");
     downloadLink.classList.remove('hidden');
-    
+
     // Create a download link
     downloadLink.href = URL.createObjectURL(blob);
     downloadLink.download = jsExcelFileName;
@@ -86,35 +86,100 @@ async function handleFileUpload() {
     downloadLink.innerText = 'Download Excel File';
 }
 
-function validateInput(input, checkStatement) {
-    if (checkStatement) {
+function validateInput(input) {
+    if (input.validity.valid) {
         input.classList.remove('invalid');
-        input.classList.add('valid');
         input.nextElementSibling.textContent = '';
     } else {
-        input.classList.remove('valid');
         input.classList.add('invalid');
         input.nextElementSibling.textContent = input.title;
     }
 }
 
-function validateFileInput(input) {
-    const file = input.files[0];
-    const isValid = file && (file.type === 'application/zip' || file.name.endsWith('.zip')) && (file.size <= 50000000);
-    validateInput(input, isValid);
+function handleFileInput(files) {
+    if (files.length > 0) {
+        const first_file = files[0];
+        selectedFile = first_file;
+        if ((first_file.type === 'application/x-zip-compressed') && (first_file.size <= 50000000)) {
+            fileInputFeedback.textContent = ``;
+            dropZone.classList.remove('highlight'); // Remove highlight
+            dropZone.classList.add('received'); // Add received class
+            dropZone.innerHTML = `<span>File received: ${first_file.name}</span>`; // Update drop zone text
+        } else {
+            fileInputFeedback.textContent = "Please upload a .zip file.";
+            dropZone.classList.remove('highlight'); // Remove highlight
+            dropZone.classList.remove('received'); // Remove received class
+            dropZone.innerHTML = `<span>Invalid file type. Please upload a .zip file.</span>`;
+        }
+    } else {
+        fileInputFeedback.textContent = "No file selected.";
+        dropZone.classList.remove('received'); // Remove received class
+        dropZone.innerHTML = `<span>Drag & drop your .zip file here or click to select</span>`; // Reset text
+    }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    const tournamentShortNameInput = document.getElementById("tournamentShortNameInput");
-    const totalPointsInput = document.getElementById("totalPointsInput");
-    const fileInput = document.getElementById("fileInput");
 
-    tournamentShortNameInput.addEventListener('input', () => validateInput(tournamentShortNameInput, tournamentShortNameInput.validity.valid));
-    totalPointsInput.addEventListener('input', () => validateInput(totalPointsInput, totalPointsInput.validity.valid));
-    fileInput.addEventListener('change', () => validateFileInput(fileInput));
+const tournamentShortNameInput = document.getElementById("tournamentShortNameInput");
+const totalPointsInput = document.getElementById("totalPointsInput");
+const fileInput = document.getElementById("fileInput");
+const dropZone = document.getElementById('dropZone');
+const fileInputFeedback = document.getElementById('fileInputFeedback');
+let selectedFile = null;
+
+tournamentShortNameInput.addEventListener('input', () => validateInput(tournamentShortNameInput));
+totalPointsInput.addEventListener('input', () => validateInput(totalPointsInput));
+fileInput.addEventListener('change', (e) => {
+    const files = e.target.files;
+    handleFileInput(files);
 });
+
+// Prevent default drag behaviors
+['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    dropZone.addEventListener(eventName, preventDefaults, false);
+    document.body.addEventListener(eventName, preventDefaults, false);
+});
+
+// Highlight drop area when item is dragged over it
+['dragenter', 'dragover'].forEach(eventName => {
+    dropZone.addEventListener(eventName, highlight, false);
+});
+
+// Remove highlight when item is no longer hovering
+['dragleave', 'drop'].forEach(eventName => {
+    dropZone.addEventListener(eventName, unhighlight, false);
+});
+
+// Handle dropped files
+dropZone.addEventListener('drop', handleDrop, false);
+dropZone.addEventListener('click', () => fileInput.click(), false);
+
+// Prevent default behavior (Prevent file from being opened)
+function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+// Highlight the drop zone
+function highlight() {
+    dropZone.classList.add('highlight');
+}
+
+// Remove highlight from the drop zone
+function unhighlight() {
+    dropZone.classList.remove('highlight');
+}
+
+// Handle dropped files
+function handleDrop(e) {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+
+    handleFileInput(files);
+    unhighlight();
+}
+
 
 document.getElementById("createTournamentForm").addEventListener("submit", async (event) => {
     event.preventDefault();
-    handleFileUpload();
+    processData();
 });
