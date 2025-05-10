@@ -13,13 +13,13 @@ async function loadPyodideAndPackages() {
     return pyodide_js;
 }
 
-function extractZipFiles(pyodide_js) {
+async function extractZipFiles(pyodide_js) {
     return pyodide_js.runPythonAsync(`
         import zipfile
         import js
         
         # Extract the ZIP file
-        accepted_zipfiles = 0
+        accepted_files = 0
         num_non_files = 0
         with zipfile.ZipFile('/uploaded.zip', 'r') as zip_ref:
             zipfile_names = zip_ref.namelist()
@@ -28,9 +28,9 @@ function extractZipFiles(pyodide_js) {
                     num_non_files += 1
                 elif file_name.endswith('.jpg'):
                     zip_ref.extract(file_name, '/images')
-                    accepted_zipfiles += 1
-        js.document.getElementById('extractFeedback').textContent = f"{accepted_zipfiles} of {len(zipfile_names)-num_non_files} file(s) accepted."
-        accepted_zipfiles
+                    accepted_files += 1
+        js.document.getElementById('extractFeedback').textContent = f"{accepted_files} of {len(zipfile_names)-num_non_files} file(s) accepted."
+        accepted_files
         `);
 }
 
@@ -53,6 +53,13 @@ async function processData(form) {
 
     const accepted_files = await extractZipFiles(pyodide_js);
     if (accepted_files <= 0) {
+        document.getElementById('extractFeedback').textContent = '';
+        loadingIndicator.classList.add('hidden');
+        form.classList.remove('hidden');
+        fileInputFeedback.textContent = "Make sure the .zip file contains proper .jpg files.";
+        dropZone.classList.remove('highlight');
+        dropZone.classList.remove('received');
+        dropZone.innerHTML = `<span>.zip file does not contain proper files</span>`;
         return;
     }
 
@@ -85,9 +92,6 @@ async function processData(form) {
     downloadLink.querySelector('a').href = URL.createObjectURL(blob);
     downloadLink.querySelector('a').download = jsExcelFileName;
     downloadLink.classList.remove('hidden');
-
-    // downloadLink.style.display = 'block'; // Show the link
-    // downloadLink.innerText = 'Download Excel File';
 }
 
 function validateInput(input) {
@@ -105,23 +109,22 @@ function handleFileInput(files) {
         const first_file = files[0];
         selectedFile = first_file;
         if ((first_file.type === 'application/x-zip-compressed') && (first_file.size <= 50000000)) {
-            fileInputFeedback.textContent = ``;
-            dropZone.classList.remove('highlight'); // Remove highlight
-            dropZone.classList.add('received'); // Add received class
-            dropZone.innerHTML = `<span>File received: ${first_file.name}</span>`; // Update drop zone text
+            fileInputFeedback.textContent = '';
+            dropZone.classList.remove('highlight');
+            dropZone.classList.add('received');
+            dropZone.innerHTML = `<span>File received: ${first_file.name}</span>`;
         } else {
             fileInputFeedback.textContent = "Please upload a .zip file.";
-            dropZone.classList.remove('highlight'); // Remove highlight
-            dropZone.classList.remove('received'); // Remove received class
+            dropZone.classList.remove('highlight');
+            dropZone.classList.remove('received');
             dropZone.innerHTML = `<span>Invalid file type. Please upload a .zip file.</span>`;
         }
     } else {
         fileInputFeedback.textContent = "No file selected.";
-        dropZone.classList.remove('received'); // Remove received class
-        dropZone.innerHTML = `<span>Drag & drop your .zip file here or click to select</span>`; // Reset text
+        dropZone.classList.remove('received');
+        dropZone.innerHTML = `<span>Drag & drop your .zip file here or click to select</span>`;
     }
 }
-
 
 const tournamentShortNameInput = document.getElementById("tournamentShortNameInput");
 const totalPointsInput = document.getElementById("totalPointsInput");
