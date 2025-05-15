@@ -70,13 +70,11 @@ async function processData(form) {
         import js
 
         # Call project entry point of the wheel
-        total_points: int = js.document.getElementById('totalPointsInput').value
         stream = create_and_export_single_tournament(
             tournament_dir = '/images',
             tournament_name = js.document.getElementById('tournamentNameInput').value,
             short_name = js.document.getElementById('tournamentShortNameInput').value,
-            total_points = total_points if total_points else 500,
-            is_team = js.document.getElementById('isTeamInput').checked,
+            is_team = js.document.querySelector('input[name="toggle"]:checked').value,
             excel_file_name = "${jsExcelFileName}"
         )
         list(stream)
@@ -128,14 +126,12 @@ function handleFileInput(files) {
 }
 
 const tournamentShortNameInput = document.getElementById("tournamentShortNameInput");
-const totalPointsInput = document.getElementById("totalPointsInput");
 const fileInput = document.getElementById("fileInput");
 const dropZone = document.getElementById('dropZone');
 const fileInputFeedback = document.getElementById('fileInputFeedback');
 let selectedFile = null;
 
 tournamentShortNameInput.addEventListener('input', () => validateInput(tournamentShortNameInput));
-totalPointsInput.addEventListener('input', () => validateInput(totalPointsInput));
 fileInput.addEventListener('change', (e) => {
     const files = e.target.files;
     handleFileInput(files);

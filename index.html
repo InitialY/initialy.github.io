@@ -18,6 +18,13 @@
         </div>
         <span id="fileInputFeedback" class="feedback"></span>
       </div>
+      <div class="form-toggle">
+        <p id="tournamentFormatLabel">Tournament Format</p>
+        <input id="toggle-solo" class="toggle toggle-left" name="toggle" value="false" type="radio" checked>
+        <label for="toggle-solo" class="btn suppress-label">Solo</label>
+        <input id="toggle-team" class="toggle toggle-right" name="toggle" value="true" type="radio">
+        <label for="toggle-team" class="btn suppress-label">Team</label>
+      </div>
       <div class="form-row">
         <label for="tournamentNameInput">Tournament Name</label>
         <input type="text" id="tournamentNameInput" name="tournamentNameInput"
@@ -28,18 +35,6 @@
         <input type="text" id="tournamentShortNameInput" name="tournamentShortNameInput" pattern="^[A-Za-z_]+$"
           title="Only letters and underscore are allowed." placeholder="saizo_solo" />
         <span id="tournamentShortNameInputFeedback" class="feedback"></span>
-      </div>
-      <div class="form-row">
-        <label for="totalPointsInput">Total Points</label>
-        <input type="number" id="totalPointsInput" min="0" step="1" placeholder="500" name="totalPointsInput"
-          pattern="^[0-9]+$" title="Only numbers are allowed." />
-        <span id="totalPointsInputFeedback" class="feedback"></span>
-      </div>
-      <div class="form-row">
-        <label for="isTeamInput">
-          Team Tournament
-          <input type="checkbox" id="isTeamInput" name="isTeamInput" />
-        </label>
       </div>
       <div class="form-row">
         <button type="submit" id="extractButton">Extract</button>
