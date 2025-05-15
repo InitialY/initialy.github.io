@@ -70,11 +70,12 @@ async function processData(form) {
         import js
 
         # Call project entry point of the wheel
+        total_points: int = js.document.getElementById('totalPointsInput').value
         stream = create_and_export_single_tournament(
             tournament_dir = '/images',
             tournament_name = js.document.getElementById('tournamentNameInput').value,
             short_name = js.document.getElementById('tournamentShortNameInput').value,
-            total_points = js.document.getElementById('totalPointsInput').value,
+            total_points = total_points if total_points else 500,
             is_team = js.document.getElementById('isTeamInput').checked,
             excel_file_name = "${jsExcelFileName}"
         )
