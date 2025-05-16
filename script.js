@@ -29,7 +29,7 @@ async function extractZipFiles(pyodide_js) {
                 elif file_name.endswith('.jpg'):
                     zip_ref.extract(file_name, '/images')
                     accepted_files += 1
-        js.document.getElementById('extractFeedback').textContent = f"{accepted_files} of {len(zipfile_names)-num_non_files} file(s) accepted."
+        js.document.getElementById('extractFeedback').textContent = f"{accepted_files} of {len(zipfile_names)-num_non_files} files accepted."
         accepted_files
         `);
 }
@@ -75,7 +75,7 @@ async function processData(form) {
             tournament_dir = '/images',
             tournament_name = js.document.getElementById('tournamentNameInput').value,
             short_name = js.document.getElementById('tournamentShortNameInput').value,
-            is_team = js.document.querySelector('input[name="toggle"]:checked').value,
+            is_team = js.document.getElementById('toggle-team').checked,
             excel_file_name = "${jsExcelFileName}"
         )
         list(stream)
