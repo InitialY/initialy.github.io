@@ -2,7 +2,7 @@ body {
   font-family: Arial, sans-serif;
   background-color: #f4f4f4;
   margin: 0;
-  padding: 20px;
+  padding: 1.25rem; /* 20px */
 }
 
 h1 {
@@ -10,32 +10,32 @@ h1 {
 }
 
 #content {
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-  max-width: 600px;
+  border-radius: 0.5rem; /* 8px */
+  box-shadow: 0 0.125rem 0.625rem rgba(0, 0, 0, 0.1); /* 0 2px 10px */
+  padding: 1.25rem; /* 20px */
+  max-width: 37.5rem; /* 600px */
   margin: auto;
 }
 
 .form-row {
   display: flex;
   flex-direction: column;
-  margin-bottom: 15px;
+  margin-bottom: 0.9375rem; /* 15px */
 }
 
 .form-toggle {
   display: flex;
   align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: 0.9375rem; /* 15px */
 }
 
 #tournamentFormatLabel {
-  margin: 10px 20px 10px 0px;
+  margin: 0.625rem 1.25rem 0.625rem 0; /* 10px 20px 10px 0px */
   font-weight: bold;
 }
 
 label {
-  margin-bottom: 5px;
+  margin-bottom: 0.3125rem; /* 5px */
   font-weight: bold;
 }
 
@@ -44,17 +44,17 @@ label {
 }
 
 input[type="file"],
-input[type="text"]{
-  padding: 10px;
+input[type="text"] {
+  padding: 0.625rem; /* 10px */
   border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 16px;
+  border-radius: 0.25rem; /* 4px */
+  font-size: 1rem; /* 16px */
 }
 
 .drop-zone {
-  border: 2px dashed #007bff;
-  border-radius: 4px;
-  padding: 20px;
+  border: 0.125rem dashed #007bff; /* 2px */
+  border-radius: 0.25rem; /* 4px */
+  padding: 1.25rem; /* 20px */
   text-align: center;
   cursor: pointer;
   background-color: #f9f9f9;
@@ -69,7 +69,7 @@ input[type="text"]{
 .drop-zone span {
   display: block;
   color: #007bff;
-  font-size: 16px;
+  font-size: 1rem; /* 16px */
 }
 
 .drop-zone.received {
@@ -92,16 +92,16 @@ input[type="file"] {
 
 input[type="checkbox"] {
   width: auto;
-  margin-top: 5px;
+  margin-top: 0.3125rem; /* 5px */
 }
 
 input[type="submit"] {
   background-color: #007bff;
   color: white;
   border: none;
-  border-radius: 4px;
-  padding: 10px;
-  font-size: 16px;
+  border-radius: 0.25rem; /* 4px */
+  padding: 0.625rem; /* 10px */
+  font-size: 1rem; /* 16px */
   cursor: pointer;
   transition: background-color 0.3s;
 }
@@ -117,8 +117,8 @@ input[type="submit"]:disabled {
 
 .feedback {
   color: red;
-  font-size: 14px;
-  margin-top: 5px;
+  font-size: 0.875rem; /* 14px */
+  margin-top: 0.3125rem; /* 5px */
 }
 
 .hidden {
@@ -127,16 +127,16 @@ input[type="submit"]:disabled {
 
 #loading {
   text-align: center;
-  font-size: 18px;
-  margin-top: 20px;
+  font-size: 1.125rem; /* 18px */
+  margin-top: 1.25rem; /* 20px */
 }
 
 .loading-circle {
-  border: 8px solid #f3f3f3;
-  border-top: 8px solid #3498db;
+  border: 0.5rem solid #f3f3f3; /* 8px */
+  border-top: 0.5rem solid #3498db; /* 8px */
   border-radius: 50%;
-  width: 50px;
-  height: 50px;
+  width: 3.125rem; /* 50px */
+  height: 3.125rem; /* 50px */
   animation: spin 1s linear infinite;
   margin: 0 auto;
 }
@@ -147,8 +147,8 @@ input[type="submit"]:disabled {
 }
 
 #downloadLink {
-  margin-top: 20px;
-  margin-bottom: 40px;
+  margin-top: 1.25rem; /* 20px */
+  margin-bottom: 2.5rem; /* 40px */
   text-align: center;
 }
 
@@ -157,10 +157,10 @@ input[type="submit"]:disabled {
 }
 
 .btn {
-  border: 3px solid #007bff;
-  border-radius: 4px;
+  border: 0.1875rem solid #007bff; /* 3px */
+  border-radius: 0.25rem; /* 4px */
   display: inline-block;
-  padding: 10px;
+  padding: 0.625rem; /* 10px */
   position: relative;
   text-align: center;
   transition: background 600ms ease, color 600ms ease;
@@ -172,7 +172,7 @@ input[type="radio"].toggle {
 
 input[type="radio"].toggle + label {
   cursor: pointer;
-  min-width: 60px;
+  min-width: 3.75rem; /* 60px */
   position: relative;
 }
 
@@ -201,7 +201,7 @@ input[type="radio"].toggle.toggle-left + label:after {
 }
 
 input[type="radio"].toggle.toggle-right + label {
-  margin-left: -5px;
+  margin-left: -0.3125rem; /* -5px */
 }
 
 input[type="radio"].toggle.toggle-right + label:after {
