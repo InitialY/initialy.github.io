@@ -60,6 +60,7 @@ async function processData(form) {
         dropZone.classList.remove('highlight');
         dropZone.classList.remove('received');
         dropZone.innerHTML = `<span>.zip file does not contain proper files</span>`;
+        extractButtonInput.disabled = true;
         return;
     }
 
@@ -112,20 +113,24 @@ function handleFileInput(files) {
             dropZone.classList.remove('highlight');
             dropZone.classList.add('received');
             dropZone.innerHTML = `<span>File received: ${first_file.name}</span>`;
+            extractButtonInput.disabled = false;
         } else {
             fileInputFeedback.textContent = "Please upload a .zip file.";
             dropZone.classList.remove('highlight');
             dropZone.classList.remove('received');
             dropZone.innerHTML = `<span>Invalid file type. Please upload a .zip file.</span>`;
+            extractButtonInput.disabled = true;
         }
     } else {
         fileInputFeedback.textContent = "No file selected.";
         dropZone.classList.remove('received');
         dropZone.innerHTML = `<span>Drag & drop your .zip file here or click to select</span>`;
+        extractButtonInput.disabled = true;
     }
 }
 
 const tournamentShortNameInput = document.getElementById("tournamentShortNameInput");
+const extractButtonInput = document.getElementById("extractButton");
 const fileInput = document.getElementById("fileInput");
 const dropZone = document.getElementById('dropZone');
 const fileInputFeedback = document.getElementById('fileInputFeedback');

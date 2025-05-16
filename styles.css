@@ -95,7 +95,7 @@ input[type="checkbox"] {
   margin-top: 5px;
 }
 
-button {
+input[type="submit"] {
   background-color: #007bff;
   color: white;
   border: none;
@@ -106,8 +106,13 @@ button {
   transition: background-color 0.3s;
 }
 
-button:hover {
+input[type="submit"]:hover {
   background-color: #0056b3;
+}
+
+input[type="submit"]:disabled {
+  background-color: #0056b3;
+  color: #cccccc;
 }
 
 .feedback {
@@ -153,6 +158,7 @@ button:hover {
 
 .btn {
   border: 3px solid #007bff;
+  border-radius: 4px;
   display: inline-block;
   padding: 10px;
   position: relative;
@@ -209,8 +215,4 @@ input[type="radio"].toggle:checked + label {
 
 input[type="radio"].toggle:checked + label:after {
   left: 0;
-}
-
-body {
-  font-family: Arial, sans-serif;
 }
