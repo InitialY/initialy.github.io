@@ -187,7 +187,6 @@ function handleDrop(e) {
     unhighlight();
 }
 
-
 document.getElementById("createTournamentForm").addEventListener("submit", async (event) => {
     event.preventDefault();
     processData(event.target);
