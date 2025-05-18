@@ -3,6 +3,7 @@ body {
   background-color: #f4f4f4;
   margin: 0;
   padding: 1.25rem; /* 20px */
+  min-width: 37.5rem;
 }
 
 h1 {
@@ -27,6 +28,13 @@ h1 {
   display: flex;
   align-items: center;
   margin-bottom: 0.9375rem; /* 15px */
+  flex-direction: row;
+}
+
+@media (max-width: 48rem) {
+  .form-toggle {
+    flex-direction: column;
+  }
 }
 
 #tournamentFormatLabel {

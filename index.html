@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
-
 <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.jsdelivr.net/pyodide/v0.27.5/full/pyodide.js"></script>
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -20,10 +20,12 @@
       </div>
       <div class="form-toggle">
         <p id="tournamentFormatLabel">Tournament Format</p>
-        <input id="toggle-solo" class="toggle toggle-left" name="toggle" value="false" type="radio" checked>
-        <label for="toggle-solo" class="btn suppress-label">Solo</label>
-        <input id="toggle-team" class="toggle toggle-right" name="toggle" value="true" type="radio">
-        <label for="toggle-team" class="btn suppress-label">Team</label>
+        <div>
+          <input id="toggle-solo" class="toggle toggle-left" name="toggle" value="false" type="radio" checked>
+          <label for="toggle-solo" class="btn suppress-label">Solo</label>
+          <input id="toggle-team" class="toggle toggle-right" name="toggle" value="true" type="radio">
+          <label for="toggle-team" class="btn suppress-label">Team</label>
+        </div>
       </div>
       <div class="form-row">
         <label for="tournamentNameInput">Tournament Name</label>
