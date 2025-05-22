@@ -4,22 +4,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.jsdelivr.net/pyodide/v0.27.5/full/pyodide.js"></script>
   <link rel="stylesheet" href="styles.css">
+  <link rel="shortcut icon" href="#">
 </head>
 <body>
   <div id="content">
     <h1>Ninjala Tournament Statistics Creator</h1>
-    <form id="createTournamentForm">
+    <p id="about-text"><span class="clickable">Click here for help</span></p>
+    <form id="create-tournament-form">
       <div class="form-row">
-        <label for="fileInput">Tournament Screenshots</label>
-        <div id="dropZone" class="drop-zone">
-          <span>Drag & drop your .zip file here or click to select</span>
-          <input type="file" id="fileInput" accept=".zip" name="fileInput" title="Only .zip files are allowed."
+        <label for="file-input">Tournament Screenshots*</label>
+        <div id="drop-zone" class="drop-zone">
+          <span id="drop-zone-text">Drag & drop your .zip file here or click to select</span>
+          <input type="file" id="file-input" accept=".zip" name="file-input" title="Only .zip files are allowed."
             required />
         </div>
-        <span id="fileInputFeedback" class="feedback"></span>
+        <span id="file-input-feedback" class="feedback"></span>
       </div>
       <div class="form-toggle">
-        <p id="tournamentFormatLabel">Tournament Format</p>
+        <p id="tournament-format-label">Tournament Format</p>
         <div>
           <input id="toggle-solo" class="toggle toggle-left" name="toggle" value="false" type="radio" checked>
           <label for="toggle-solo" class="btn suppress-label">Solo</label>
@@ -28,31 +30,38 @@
         </div>
       </div>
       <div class="form-row">
-        <label for="tournamentNameInput">Tournament Name</label>
-        <input type="text" id="tournamentNameInput" name="tournamentNameInput"
-          placeholder="WNA Tours: Saizo Cup (Solo)" />
+        <label for="tournament-name-input">Tournament Name</label>
+        <input type="text" id="tournament-name-input" name="tournament-name-input"
+          placeholder="example: WNA Tours: Saizo Cup (Solo)" />
       </div>
       <div class="form-row">
-        <label for="tournamentShortNameInput">Short Name (i.e. Excel Sheet and Excel Table Name)</label>
-        <input type="text" id="tournamentShortNameInput" name="tournamentShortNameInput" pattern="^([A-Za-z_][A-Za-z0-9_]*|)$"
-          title="Digits at the beginning and special characters are not allowed." placeholder="saizo_solo" />
-        <span id="tournamentShortNameInputFeedback" class="feedback"></span>
+        <label for="tournament-short-name-input">Short Name (i.e. Excel Sheet and Excel Table Name)</label>
+        <input type="text" id="tournament-short-name-input" name="tournament-short-name-input" pattern="^([A-Za-z_][A-Za-z0-9_]*|)$"
+          title="Digits at the beginning and special characters are not allowed." placeholder="example: saizo_solo" />
+        <span id="tournament-short-name-input-feedback" class="feedback"></span>
       </div>
       <div class="form-row">
-        <input type="submit" id="extractButton" value="Extract" disabled>
+        <input type="submit" id="extract-button" value="Extract" disabled>
       </div>
     </form>
-    
     <div id="loading" class="hidden">
       <div class="loading-circle"></div>
       <p>Loading...</p>
-      <p id="extractFeedback"></p>
+      <p id="extract-feedback"></p>
     </div>
-    
-    <div id="downloadLink" class="hidden">
+    <div id="download-link" class="hidden">
       <p>Tournament Statistics successfully created!</p>
       <a href="#" download>Download Excel File</a>
     </div>
+  </div>
+  <div id="overlay" class="overlay"></div>
+  <div id="about-tab" class="about-tab">
+    <span id="close-tab" class="close-icon">&times;</span> 
+    <h2>How to use</h2>
+    <p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
+    <p>Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi. Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.</p>
+    <p>Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi.</p>
+    <img src="https://via.placeholder.com/150" alt="Placeholder Image">
   </div>
   <script src="script.js"></script>
 </body>
