@@ -51,6 +51,24 @@ function handleZipFile(pyodide_js, dirPath) {
     }
 }
 
+async function checkFilesInFS(pyodide_js, dirPath) {
+    return pyodide_js.runPythonAsync(`
+        import os
+
+        # Specify the path you want to check
+        path = '${dirPath}/'
+
+        # List files in the specified directory
+        try:
+            files = os.listdir(path)
+            print("Files in directory:", files)
+        except FileNotFoundError:
+            print("The specified path does not exist.")
+        except Exception as e:
+            print("An error occurred:", e)
+    `);
+}
+
 async function processData(form) {
     if (selectedFiles.length === 0) {
         return;
@@ -88,6 +106,8 @@ async function processData(form) {
     if (!isMobile && (selectedFiles.length === 1)) {
         handleZipFile(pyodide_js, dirPath);
     }
+
+    checkFilesInFS(pyodide_js, dirPath);
     
     // Now you can call a Python function to extract and process the images
     const jsExcelFileName = 'NinjalaTournamentStats.xlsx';
@@ -143,6 +163,7 @@ function handleFileMobile(files) {
         }
     }
     fileInputFeedback.textContent = '';
+    dropZone.innerHTML = '';
     unhighlight();
     dropZone.classList.add('received');
     for (let index = 0; index < selectedFiles.length; index++) {
@@ -187,15 +208,16 @@ function handleFileInput(files) {
 
 function setupDropZone(){
     if (isMobile) {
-        fileInput.setAttribute('accept', 'images/jpeg');
+        fileInput.setAttribute('accept', 'image/jpeg');
+        fileInput.title = 'Only .jpg files are allowed.';
         dropZoneText.textContent = 'Drop multiple JPEG images here or click to select';
-        fileInput.multiple = true;
+        fileInput.setAttribute('multiple', 'multiple');
     } else {
         fileInput.setAttribute('accept', '.zip');
+        fileInput.title = 'Only .zip files a allowed.';
         dropZoneText.textContent = 'Drag & drop .zip file here or click to select';
-        fileInput.multiple = false;
+        fileInput.removeAttribute('multiple');
     }
-
 }
 
 const tournamentShortNameInput = document.getElementById("tournament-short-name-input");

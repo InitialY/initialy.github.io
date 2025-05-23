@@ -278,3 +278,21 @@ input[type="radio"].toggle:checked + label:after {
     right: 10px;
     z-index: 3;
 }
+
+img {
+  width: 80%;
+  display: block;
+  margin: auto;
+  padding: .3rem;
+}
+
+.about-image-file-name {
+  font-style: italic;
+  font-weight: 200;
+}
+
+.about-img-desc {
+  max-width: 80%;
+  margin: 0 auto;
+  text-align: center;
+}
