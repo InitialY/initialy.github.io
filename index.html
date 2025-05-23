@@ -9,7 +9,7 @@
 <body>
   <div id="content">
     <h1>Ninjala&trade; Tournament Statistics Creator</h1>
-    <p id="about-text"><span class="clickable">Click here for help</span></p>
+    <p id="help-text"><span class="clickable">Click here for help</span></p>
     <form id="create-tournament-form">
       <div class="form-row">
         <label for="file-input">Tournament Screenshots*</label>
@@ -30,7 +30,7 @@
         </div>
       </div>
       <div class="form-row">
-        <label for="tournament-name-input">Tournament Name</label>
+        <label for="tournament-name-input" title="This name will be used for the diagram name in the excel file.">Tournament Name</label>
         <input type="text" id="tournament-name-input" name="tournament-name-input"
           placeholder="example: WNA Tours: Saizo Cup (Solo)" />
       </div>
@@ -54,20 +54,30 @@
       <a href="#" download>Download Excel File</a>
     </div>
   </div>
-  <div id="overlay" class="overlay"></div>
-  <div id="about-tab" class="about-tab">
-    <span id="close-tab" class="close-icon">&times;</span> 
-    <h2>How to use</h2>
-    <p>Click on the blue dashed box and upload your screenshots. Your screenshots must be taken with the screenshot capturing feature of the Nintendo Switch System and must not be renamed. The name should look like this:</p>
-    <span class="about-image-file-name">2023040204065400-77C5FCCC39A7B80BD3CF2C480CEBE83C.jpg</span>
-    <p>There are two types of images, the website can recognize:</p>
-    <img src="./tournament_match_result_example.jpg" alt="Battle History">
-    <div class="about-img-desc">The Battle History appears after the winner presentation and stays for 60 seconds.</div>
-    <img src="./tournament_match_result_details_example.jpg" alt="Detailed Results">
-    <div class="about-img-desc">Press the + Button within the 60 seconds to display the Detailed Results.</div>
-    <p>For the first image, the Battle History, watch out for the reward pop-up message. To be safe, take the screenshot after confirming the rewards.</p>
-    <p>For the second image, the Detailed Results, you must not scroll down. Take the screenshot right after pressing the + Button.</p>
-    <p>Make sure to capture the screenshots within the 60 seconds and before heading to the next match or back to the menu.</p>
+  <div id="help-popup" class="help-popup">
+    <span id="close-popup" class="close-icon">&times;</span> 
+    <div class="help-popup-content">
+      <h2>How to use</h2>
+      <p>Click on the blue dashed box and upload your screenshots. Your screenshots must be taken with the screenshot capturing feature of the Nintendo Switch System and must not be renamed. The name should look like this:</p>
+      <span class="popup-image-file-name">2023040204065400-77C5FCCC39A7B80BD3CF2C480CEBE83C.jpg</span>
+      <p>There are two types of images, the website can recognize:</p>
+      <figure>
+        <img src="./2023040204221000-77C5FCCC39A7B80BD3CF2C480CEBE83C.jpg" alt="Battle History">
+        <figcaption>The Battle History appears after the winner presentation and stays for 60 seconds.</figcaption>
+      </figure>
+      <figure>
+        <img src="./2023040204221100-77C5FCCC39A7B80BD3CF2C480CEBE83C.jpg" alt="Detailed Results">
+        <figcaption>Press the + Button within the 60 seconds to display the Detailed Results.</figcaption>
+      </figure>
+      <p>For the first image, the Battle History, watch out for the reward pop-up message. To be safe, take the screenshot after confirming the rewards.</p>
+      <p>For the second image, the Detailed Results, you must not scroll down. Take the screenshot right after pressing the + Button.</p>
+      <p>Make sure to capture the screenshots within the 60 seconds and before heading to the next match or back to the menu.</p>
+      <p>After entering valid input values and pressing the "Extract" button, a download link provides an excel file. This file is editable, so you can add more infos if you like. You can also import the file into Google Sheets or LibreOffice Calc. Here is an example:</p>
+      <figure>
+        <img src="./NinjalaTournamentStats.jpg" alt="Generated Excel File Example">
+        <figcaption>Here is an example Excel File. You can also fill in missing infos.</figcaption>
+      </figure>
+    </div>
   </div>
   <script src="script.js"></script>
 </body>

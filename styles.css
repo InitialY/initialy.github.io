@@ -88,7 +88,8 @@ input[type="text"] {
   border-color: #155724;
 }
 
-.drop-zone.received span {
+.drop-zone.received span,
+.drop-zone.received ul {
   color: #155724;
 }
 
@@ -99,6 +100,14 @@ input[type="text"] {
 
 input[type="file"] {
   display: none;
+}
+
+.selected-files-list {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  max-height: 10vh;
+  overflow: scroll;
 }
 
 input[type="checkbox"] {
@@ -230,69 +239,67 @@ input[type="radio"].toggle:checked + label:after {
 }
 
 .clickable {
-    color: #007bff;
-    cursor: pointer;
-    text-decoration: underline;
+  color: #007bff;
+  cursor: pointer;
+  text-decoration: underline;
 }
 
-#about-text {
+#help-text {
   text-align: center;
 }
 
-.overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-    z-index: 1;
+.help-popup {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1;
 }
 
-.about-tab {
-    display: none;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: white;
-    padding: 20px;
-    border-radius: 0.5rem;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-    z-index: 2;
-    min-width: 20rem;
-    max-width: 90%;
-    max-height: 80vh;
-    overflow-y: auto;
-    width: auto;
-    box-sizing: border-box;
+.help-popup-content {
+  position: fixed;
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: auto;
+  box-sizing: border-box;
+  min-width: 20rem;
+  max-width: 90%;
+  max-height: 70vh;
+  overflow-y: auto;
+  margin: auto;
 }
 
 .close-icon {
-    font-size: 1.5rem;
-    color: #007bff;
-    cursor: pointer;
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    z-index: 3;
+  font-size: 4rem;
+  color: #fff;
+  cursor: pointer;
+  position: absolute;
+  top: 0;
+  right: 2%;
 }
 
 img {
   width: 80%;
+  max-width: 62.5rem;
   display: block;
   margin: auto;
   padding: .3rem;
 }
 
-.about-image-file-name {
-  font-style: italic;
-  font-weight: 200;
+figcaption {
+  text-align: center;
+  color: #0056b3;
+  font-size: .8rem;
 }
 
-.about-img-desc {
-  max-width: 80%;
-  margin: 0 auto;
-  text-align: center;
+.popup-image-file-name {
+  font-style: italic;
+  font-weight: 200;
 }

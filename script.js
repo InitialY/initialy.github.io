@@ -41,9 +41,9 @@ function handleZipFile(pyodide_js, dirPath) {
         document.getElementById('extract-feedback').textContent = '';
         loadingIndicator.classList.add('hidden');
         form.classList.remove('hidden');
-        aboutText.classList.remove('hidden');
+        helpText.classList.remove('hidden');
         fileInputFeedback.textContent = "Make sure the .zip file contains proper .jpg files.";
-        dropZone.classList.remove('highlight');
+        unhighlight();
         dropZone.classList.remove('received');
         dropZone.innerHTML = `<span>.zip file does not contain proper files</span>`;
         extractButtonInput.disabled = true;
@@ -75,9 +75,9 @@ async function processData(form) {
     }
     // Hide the form
     form.classList.add('hidden');
-    // Hide about
-    const aboutText = document.getElementById('about-text');
-    aboutText.classList.add('hidden')
+    // Hide help
+    const helpText = document.getElementById('help-text');
+    helpText.classList.add('hidden')
     // Show loading indicator
     const loadingIndicator = document.getElementById('loading');
     loadingIndicator.classList.remove('hidden');
@@ -107,8 +107,6 @@ async function processData(form) {
         handleZipFile(pyodide_js, dirPath);
     }
 
-    checkFilesInFS(pyodide_js, dirPath);
-    
     // Now you can call a Python function to extract and process the images
     const jsExcelFileName = 'NinjalaTournamentStats.xlsx';
     const excelFileData = await pyodide_js.runPythonAsync(`
@@ -155,7 +153,7 @@ function handleFileMobile(files) {
             selectedFiles.push(files[index]);
         } else {
             fileInputFeedback.textContent = "Only .jpg files are allowed.";
-            dropZone.classList.remove('highlight');
+            unhighlight();
             dropZone.classList.remove('received');
             dropZone.innerHTML = `<span>Invalid file type.</span>`;
             extractButtonInput.disabled = true;
@@ -163,12 +161,17 @@ function handleFileMobile(files) {
         }
     }
     fileInputFeedback.textContent = '';
-    dropZone.innerHTML = '';
+    dropZone.innerHTML = '<span></span>';
     unhighlight();
     dropZone.classList.add('received');
+    dropZone.innerHTML = dropZone.innerHTML.concat(`<ul class="selected-files-list"></ul>`);
+    let dropZoneUl = dropZone.querySelector("ul");
     for (let index = 0; index < selectedFiles.length; index++) {
-        dropZone.innerHTML = dropZone.innerHTML.concat(`<li>${selectedFiles[index].name}</li>`);
+        let liElement = document.createElement("li");
+        liElement.textContent = `${selectedFiles[index].name}`;
+        dropZoneUl.appendChild(liElement);
     }
+    dropZone.querySelector("span").textContent = `${selectedFiles.length} files received`
     extractButtonInput.disabled = false;
 }
 
@@ -177,13 +180,13 @@ function handleFileDesktop(files) {
     if ((first_file.type === 'application/x-zip-compressed') && (first_file.size <= 50000000)) {
         selectedFiles.push(first_file);
         fileInputFeedback.textContent = '';
-        dropZone.classList.remove('highlight');
+        unhighlight();
         dropZone.classList.add('received');
         dropZone.innerHTML = `<span>File received: ${first_file.name}</span>`;
         extractButtonInput.disabled = false;
     } else {
         fileInputFeedback.textContent = "Please upload a .zip file.";
-        dropZone.classList.remove('highlight');
+        unhighlight();
         dropZone.classList.remove('received');
         dropZone.innerHTML = `<span>Invalid file type.</span>`;
         extractButtonInput.disabled = true;
@@ -284,23 +287,25 @@ function handleDrop(e) {
     unhighlight();
 }
 
-document.getElementById('about-text').addEventListener('click', function() {
-    document.getElementById('overlay').style.display = 'block';
-    document.getElementById('about-tab').style.display = 'block';
+document.getElementById('help-text').addEventListener('click', function() {
+    document.getElementById('help-popup').style.display = 'block';
 });
 
 
-document.getElementById('close-tab').addEventListener('click', function() {
-    closeTab();
+document.getElementById('close-popup').addEventListener('click', function() {
+    closePopup();
 });
 
-document.getElementById('overlay').addEventListener('click', function() {
-    closeTab();
-});
+window.onclick = function(event) {
+    const popup = document.getElementById('help-popup');
 
-function closeTab() {
-    document.getElementById('overlay').style.display = 'none';
-    document.getElementById('about-tab').style.display = 'none';
+    if (event.target === popup) {
+        closePopup();
+    }
+}
+
+function closePopup() {
+    document.getElementById('help-popup').style.display = 'none';
 }
 
 document.getElementById("create-tournament-form").addEventListener("submit", async (event) => {
