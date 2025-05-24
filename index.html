@@ -4,22 +4,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.jsdelivr.net/pyodide/v0.27.5/full/pyodide.js"></script>
   <link rel="stylesheet" href="styles.css">
+  <link rel="shortcut icon" href="#">
 </head>
 <body>
   <div id="content">
-    <h1>Ninjala Tournament Statistics Creator</h1>
-    <form id="createTournamentForm">
+    <h1>Ninjala&trade; Tournament Statistics Creator</h1>
+    <p id="help-text"><span class="clickable">Click here for help</span></p>
+    <form id="create-tournament-form">
       <div class="form-row">
-        <label for="fileInput">Tournament Screenshots</label>
-        <div id="dropZone" class="drop-zone">
-          <span>Drag & drop your .zip file here or click to select</span>
-          <input type="file" id="fileInput" accept=".zip" name="fileInput" title="Only .zip files are allowed."
+        <label for="file-input">Tournament Screenshots*</label>
+        <div id="drop-zone" class="drop-zone">
+          <span id="drop-zone-text">Drag & drop your .zip file here or click to select</span>
+          <input type="file" id="file-input" accept=".zip" name="file-input" title="Only .zip files are allowed."
             required />
         </div>
-        <span id="fileInputFeedback" class="feedback"></span>
+        <span id="file-input-feedback" class="feedback"></span>
       </div>
       <div class="form-toggle">
-        <p id="tournamentFormatLabel">Tournament Format</p>
+        <p id="tournament-format-label">Tournament Format</p>
         <div>
           <input id="toggle-solo" class="toggle toggle-left" name="toggle" value="false" type="radio" checked>
           <label for="toggle-solo" class="btn suppress-label">Solo</label>
@@ -28,30 +30,55 @@
         </div>
       </div>
       <div class="form-row">
-        <label for="tournamentNameInput">Tournament Name</label>
-        <input type="text" id="tournamentNameInput" name="tournamentNameInput"
-          placeholder="WNA Tours: Saizo Cup (Solo)" />
+        <label for="tournament-name-input" title="This name will be used for the diagram name in the excel file.">Tournament Name</label>
+        <input type="text" id="tournament-name-input" name="tournament-name-input"
+          placeholder="example: WNA Tours: Saizo Cup (Solo)" />
       </div>
       <div class="form-row">
-        <label for="tournamentShortNameInput">Short Name (i.e. Excel Sheet and Excel Table Name)</label>
-        <input type="text" id="tournamentShortNameInput" name="tournamentShortNameInput" pattern="^([A-Za-z_][A-Za-z0-9_]*|)$"
-          title="Digits at the beginning and special characters are not allowed." placeholder="saizo_solo" />
-        <span id="tournamentShortNameInputFeedback" class="feedback"></span>
+        <label for="tournament-short-name-input">Short Name (i.e. Excel Sheet and Excel Table Name)</label>
+        <input type="text" id="tournament-short-name-input" name="tournament-short-name-input" pattern="^([A-Za-z_][A-Za-z0-9_]*|)$"
+          title="Digits at the beginning and special characters are not allowed, except for underscore." placeholder="example: saizo_solo" />
+        <span id="tournament-short-name-input-feedback" class="feedback"></span>
       </div>
       <div class="form-row">
-        <input type="submit" id="extractButton" value="Extract" disabled>
+        <input type="submit" id="extract-button" value="Extract" disabled>
       </div>
     </form>
-    
     <div id="loading" class="hidden">
       <div class="loading-circle"></div>
       <p>Loading...</p>
-      <p id="extractFeedback"></p>
+      <p id="extract-feedback"></p>
     </div>
-    
-    <div id="downloadLink" class="hidden">
+    <div id="download-link" class="hidden">
       <p>Tournament Statistics successfully created!</p>
       <a href="#" download>Download Excel File</a>
+    </div>
+  </div>
+  <div id="help-popup" class="help-popup">
+    <span id="close-popup" class="close-icon">&times;</span> 
+    <div class="help-popup-content">
+      <h2>How to use</h2>
+      <p>Click on the blue dashed box and upload your screenshots. Your screenshots must be taken with the screenshot capturing feature of the Nintendo Switch System and must not be renamed. The name should look like this:</p>
+      <span class="popup-image-file-name">2023040204065400-77C5FCCC39A7B80BD3CF2C480CEBE83C.jpg</span>
+      <p>There are two types of images, the website can recognize:</p>
+      <figure>
+        <img src="./2023040204221000-77C5FCCC39A7B80BD3CF2C480CEBE83C.jpg" alt="Battle History">
+        <figcaption>The Battle History appears after the winner presentation and stays for 60 seconds.</figcaption>
+      </figure>
+      <figure>
+        <img src="./2023040204221100-77C5FCCC39A7B80BD3CF2C480CEBE83C.jpg" alt="Detailed Results">
+        <figcaption>Press the + Button within the 60 seconds to display the Detailed Results.</figcaption>
+      </figure>
+      <p>For the first image, the Battle History, watch out for the reward pop-up message. To be safe, take the screenshot after confirming the rewards.</p>
+      <p>For the second image, the Detailed Results, you must not scroll down. Take the screenshot right after pressing the + Button.</p>
+      <p>Make sure to capture the screenshots within the 60 seconds and before heading to the next match or back to the menu.</p>
+      <p>After entering valid input values and pressing the "Extract" button, a download link provides an excel file. This file is editable, so you can add more infos if you like. You can also import the file into Google Sheets or LibreOffice Calc. Here is an example:</p>
+      <figure>
+        <img src="./NinjalaTournamentStats.jpg" alt="Generated Excel File Example">
+        <figcaption>Here is an example Excel File. You can also fill in missing infos.</figcaption>
+      </figure>
+      <h2>About</h2>
+      <p>You can find more info about this project on <a href="https://github.com/InitialY/initialy.github.io" target="_blank">GitHub.</a></p>
     </div>
   </div>
   <script src="script.js"></script>
