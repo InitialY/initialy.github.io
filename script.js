@@ -99,10 +99,6 @@ async function processData(form) {
         }
     }
     
-    // const zipData = await selectedFiles.arrayBuffer();
-    // Write the ZIP file to the Pyodide virtual file system
-    // pyodide_js.FS.writeFile('/uploaded.zip', new Uint8Array(zipData));
-    
     if (!isMobile && (selectedFiles.length === 1)) {
         handleZipFile(pyodide_js, dirPath);
     }
@@ -114,27 +110,39 @@ async function processData(form) {
         import js
 
         # Call project entry point of the wheel
-        stream = create_and_export_single_tournament(
-            tournament_dir = '/images',
-            tournament_name = js.document.getElementById('tournament-name-input').value,
-            short_name = js.document.getElementById('tournament-short-name-input').value,
-            is_team = js.document.getElementById('toggle-team').checked,
-            excel_file_name = "${jsExcelFileName}"
-        )
-        list(stream)
+        stream = None
+        try:
+            stream = create_and_export_single_tournament(
+                tournament_dir = '/images',
+                tournament_name = js.document.getElementById('tournament-name-input').value,
+                short_name = js.document.getElementById('tournament-short-name-input').value,
+                is_team = js.document.getElementById('toggle-team').checked,
+                excel_file_name = "${jsExcelFileName}"
+            )
+            stream = list(stream)
+        except Exception as e:
+            print("Error, files are incorrect.", e)
+            stream = None
     `);
 
-    // Create a Blob from the Excel file data
-    const blob = new Blob([new Uint8Array(excelFileData)], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    
     // Hide loading indicator
     loadingIndicator.classList.add('hidden');
 
-    // Create a download link
-    const downloadLink = document.getElementById("download-link");
-    downloadLink.querySelector('a').href = URL.createObjectURL(blob);
-    downloadLink.querySelector('a').download = jsExcelFileName;
-    downloadLink.classList.remove('hidden');
+    if (excelFileData != null) {
+        // Create a Blob from the Excel file data
+        const blob = new Blob([new Uint8Array(excelFileData)], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        
+        // Create a download link
+        const downloadLink = document.getElementById("download-link");
+        downloadLink.querySelector('a').href = URL.createObjectURL(blob);
+        downloadLink.querySelector('a').download = jsExcelFileName;
+        downloadLink.classList.remove('hidden');
+    } else {
+        const errorText = document.createElement("p");
+        errorText.textContent = "The files do not meet the criterias. Reload the page and check out the help link.";
+        errorText.style.textAlign = "center";
+        document.getElementById("content").appendChild(errorText);
+    }
 }
 
 function validateInput(input) {
