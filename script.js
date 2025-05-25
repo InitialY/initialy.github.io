@@ -9,7 +9,7 @@ async function installLocalWheel(pyodide_js, wheelPath) {
 async function loadPyodideAndPackages() {
     let pyodide_js = await loadPyodide();
     await pyodide_js.loadPackage("micropip");
-    await installLocalWheel(pyodide_js, '/image_number_extraction-0.1.0-py3-none-any.whl');
+    await installLocalWheel(pyodide_js, './image_number_extraction-0.1.0-py3-none-any.whl');
     return pyodide_js;
 }
 
