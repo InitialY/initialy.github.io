@@ -2,11 +2,14 @@
 async function loadPyodideAndPackages() {
     let pyodide_js = await loadPyodide();
     await pyodide_js.loadPackage("micropip");
-    const wheelPath = "https://initialy.github.io/image_number_extraction-0.1.0-py3-none-any.whl";
+    
+    const wheelFileName = 'image_number_extraction-0.1.0-py3-none-any.whl';
+    const wheelUrl = new URL(wheelFileName, window.location.href).href;
+    
     await pyodide_js.runPythonAsync(`
         import micropip
         
-        await micropip.install("${wheelPath}")
+        await micropip.install("${wheelUrl}")
     `);
     return pyodide_js;
 }
@@ -121,6 +124,7 @@ async function processData(form) {
         except Exception as e:
             print("Error, files are incorrect.", e)
             stream = None
+        stream
     `);
 
     // Hide loading indicator
