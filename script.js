@@ -1,17 +1,13 @@
-async function installLocalWheel(pyodide_js, wheelPath) {
-    await pyodide_js.runPythonAsync(`
-            import micropip
-            from pyodide.http import pyfetch
-            response = await pyfetch(${wheelPath})
-            await micropip.install(response, keep_going=True)
-        `);
-}
-
-// Load Pyodide 
+// Load Pyodide and Wheel
 async function loadPyodideAndPackages() {
     let pyodide_js = await loadPyodide();
     await pyodide_js.loadPackage("micropip");
-    await installLocalWheel(pyodide_js, "https://initialy.github.io/image_number_extraction-0.1.0-py3-none-any.whl");
+    const wheelPath = "https://initialy.github.io/image_number_extraction-0.1.0-py3-none-any.whl";
+    await pyodide_js.runPythonAsync(`
+        import micropip
+        
+        await micropip.install("${wheelPath}")
+    `);
     return pyodide_js;
 }
 
