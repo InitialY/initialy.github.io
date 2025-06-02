@@ -14,9 +14,9 @@
       <div class="form-row">
         <label for="file-input">Tournament Screenshots*</label>
         <div id="drop-zone" class="drop-zone">
-          <span id="drop-zone-text">Drag & drop your .zip file here or click to select</span>
-          <input type="file" id="file-input" accept=".zip" name="file-input" title="Only .zip files are allowed."
-            required />
+          <span id="drop-zone-text">Drag & drop or click here to select your .zip or .jpg files</span>
+          <input type="file" id="file-input" accept=".zip, .jpg, .jpeg" name="file-input" title="Only either .zip or .jpg files are allowed."
+            required multiple/>
         </div>
         <span id="file-input-feedback" class="feedback"></span>
       </div>
@@ -46,8 +46,11 @@
     </form>
     <div id="loading" class="hidden">
       <div class="loading-circle"></div>
-      <p>Loading...</p>
+      <p id="loading-text">Loading...</p>
       <p id="extract-feedback"></p>
+      <div class="loading-bar-container">
+        <div class="loading-bar" id="loading-bar"></div>
+      </div>
     </div>
     <div id="download-link" class="hidden">
       <p>Tournament Statistics successfully created!</p>
@@ -67,10 +70,10 @@
       </figure>
       <figure>
         <img src="./2023040204221100-77C5FCCC39A7B80BD3CF2C480CEBE83C.jpg" alt="Detailed Results">
-        <figcaption>Press the - Button within the 60 seconds to display the Detailed Results.</figcaption>
+        <figcaption>Press the (-) Button within the 60 seconds to display the Detailed Results.</figcaption>
       </figure>
       <p>For the first image, the Battle History, watch out for the reward pop-up message. To be safe, take the screenshot after confirming the rewards.</p>
-      <p>For the second image, the Detailed Results, you must not scroll down. Take the screenshot right after pressing the + Button.</p>
+      <p>For the second image, the Detailed Results, you must not scroll down. Take the screenshot right after pressing the (-) Button.</p>
       <p>Make sure to capture the screenshots within the 60 seconds and before heading to the next match or back to the menu.</p>
       <p>After entering valid input values and pressing the "Extract" button, a download link provides an excel file. This file is editable, so you can add more infos if you like. You can also import the file into Google Sheets or LibreOffice Calc. Here is an example:</p>
       <figure>
@@ -80,6 +83,9 @@
       <h2>About</h2>
       <p>You can find more info about this project on <a href="https://github.com/InitialY/initialy.github.io" target="_blank">GitHub.</a></p>
     </div>
+  </div>
+  <div id="console-container" class="hidden">
+    <pre id="console-output"></pre>
   </div>
   <script src="script.js"></script>
 </body>

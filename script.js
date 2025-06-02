@@ -1,21 +1,26 @@
-// Load Pyodide and Wheel
 async function loadPyodideAndPackages() {
-    let pyodide_js = await loadPyodide();
-    await pyodide_js.loadPackage("micropip");
+    const loadingBar = document.getElementById("loading-bar");
+    const pyodideJS = await loadPyodide();
     
+    loadingBar.style.width = "33.33%";
+    await pyodideJS.loadPackage("micropip");
+    
+    loadingBar.style.width = "66.66%";
     const wheelFileName = 'image_number_extraction-0.1.0-py3-none-any.whl';
     const wheelUrl = new URL(wheelFileName, window.location.href).href;
     
-    await pyodide_js.runPythonAsync(`
+    await pyodideJS.runPythonAsync(`
         import micropip
         
         await micropip.install("${wheelUrl}")
     `);
-    return pyodide_js;
+    loadingBar.style.width = "100%";
+    loadingBar.classList.add("hidden");
+    return pyodideJS;
 }
 
-async function extractZipFile(pyodide_js, dirPath) {
-    return pyodide_js.runPythonAsync(`
+async function extractZipFile(pyodideJS, dirPath) {
+    return await pyodideJS.runPythonAsync(`
         import zipfile
         import js
         
@@ -28,85 +33,69 @@ async function extractZipFile(pyodide_js, dirPath) {
                 if file_name.endswith('/'):
                     num_non_files += 1
                 elif file_name.endswith('.jpg'):
-                    zip_ref.extract(file_name, '/images')
+                    zip_ref.extract(file_name, '${dirPath}')
                     accepted_files += 1
-        js.document.getElementById('extract-feedback').textContent = f"{accepted_files} of {len(zipfile_names)-num_non_files} files accepted."
+        js.document.getElementById('extract-feedback').textContent = f'{accepted_files} of {len(zipfile_names)-num_non_files} files accepted.'
         accepted_files
         `);
 }
 
-function handleZipFile(pyodide_js, dirPath) {
-    const accepted_files = extractZipFile(pyodide_js, dirPath);
+async function handleZipFile(pyodideJS, dirPath) {
+    const accepted_files = await extractZipFile(pyodideJS, dirPath);
+    zipfile_received = false;
     
     if (accepted_files <= 0) {
         document.getElementById('extract-feedback').textContent = '';
         loadingIndicator.classList.add('hidden');
         form.classList.remove('hidden');
         helpText.classList.remove('hidden');
-        fileInputFeedback.textContent = "Make sure the .zip file contains proper .jpg files.";
-        unhighlight();
-        dropZone.classList.remove('received');
-        dropZone.innerHTML = `<span>.zip file does not contain proper files</span>`;
-        extractButtonInput.disabled = true;
+        
+        selectedFiles = [];
+        invalidFileInputUIHandle("Make sure the .zip file contains proper .jpg files.", ".zip file does not contain proper files");
         return;
     }
-}
-
-async function checkFilesInFS(pyodide_js, dirPath) {
-    return pyodide_js.runPythonAsync(`
-        import os
-
-        # Specify the path you want to check
-        path = '${dirPath}/'
-
-        # List files in the specified directory
-        try:
-            files = os.listdir(path)
-            print("Files in directory:", files)
-        except FileNotFoundError:
-            print("The specified path does not exist.")
-        except Exception as e:
-            print("An error occurred:", e)
-    `);
 }
 
 async function processData(form) {
     if (selectedFiles.length === 0) {
+        console.log("No selected files.");
         return;
     }
-    // Hide the form
+    
     form.classList.add('hidden');
-    // Hide help
     const helpText = document.getElementById('help-text');
-    helpText.classList.add('hidden')
-    // Show loading indicator
+    helpText.classList.add('hidden');
     const loadingIndicator = document.getElementById('loading');
     loadingIndicator.classList.remove('hidden');
     
-    const pyodide_js = await loadPyodideAndPackages();
+    extractFeedback.textContent = "Preparing extraction";
     
-    // create directory for images
-    const dirPath = "/images"
-    pyodide_js.FS.mkdir(dirPath);
+    const pyodideJS = await loadPyodideAndPackages();
 
-    // write files into pyodide virtual file system
+    extractFeedback.textContent = "Preparing images";
+    const dirPath = "/images";
+    pyodideJS.FS.mkdir(dirPath);
     for (let index = 0; index < selectedFiles.length; index++) {
         try {
             const currentFile = selectedFiles[index];
             const fileData = await currentFile.arrayBuffer();
-            pyodide_js.FS.writeFile(`${dirPath}/${currentFile.name}`, new Uint8Array(fileData))    
+            pyodideJS.FS.writeFile(`${dirPath}/${currentFile.name}`, new Uint8Array(fileData));
         } catch (error) {
             console.error("Error writing file:", error);
+            return;
         }
     }
-    
-    if (!isMobile && (selectedFiles.length === 1)) {
-        handleZipFile(pyodide_js, dirPath);
+    if (zipfile_received) {
+        try {
+            await handleZipFile(pyodideJS, dirPath);
+        } catch (error) {
+            console.error("Cannot extract and handle files in zip", error);
+        }
     }
 
-    // Now you can call a Python function to extract and process the images
+    extractFeedback.textContent = "Extracting";
     const jsExcelFileName = 'NinjalaTournamentStats.xlsx';
-    const excelFileData = await pyodide_js.runPythonAsync(`
+    const excelFileData = await pyodideJS.runPythonAsync(`
         from image_number_extraction.main import create_and_export_single_tournament
         import js
 
@@ -114,7 +103,7 @@ async function processData(form) {
         stream = None
         try:
             stream = create_and_export_single_tournament(
-                tournament_dir = '/images',
+                tournament_dir = '${dirPath}',
                 tournament_name = js.document.getElementById('tournament-name-input').value,
                 short_name = js.document.getElementById('tournament-short-name-input').value,
                 is_team = js.document.getElementById('toggle-team').checked,
@@ -127,14 +116,11 @@ async function processData(form) {
         stream
     `);
 
-    // Hide loading indicator
     loadingIndicator.classList.add('hidden');
 
     if (excelFileData != null) {
-        // Create a Blob from the Excel file data
         const blob = new Blob([new Uint8Array(excelFileData)], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
         
-        // Create a download link
         const downloadLink = document.getElementById("download-link");
         downloadLink.querySelector('a').href = URL.createObjectURL(blob);
         downloadLink.querySelector('a').download = jsExcelFileName;
@@ -157,19 +143,7 @@ function validateInput(input) {
     }
 }
 
-function handleFileMobile(files) {
-    for (let index = 0; index < files.length; index++) {
-        if (files[index].type === 'image/jpeg') {
-            selectedFiles.push(files[index]);
-        } else {
-            fileInputFeedback.textContent = "Only .jpg files are allowed.";
-            unhighlight();
-            dropZone.classList.remove('received');
-            dropZone.innerHTML = `<span>Invalid file type.</span>`;
-            extractButtonInput.disabled = true;
-            return
-        }
-    }
+function validFileInputUIHandle() {
     fileInputFeedback.textContent = '';
     dropZone.innerHTML = '<span></span>';
     unhighlight();
@@ -181,55 +155,74 @@ function handleFileMobile(files) {
         liElement.textContent = `${selectedFiles[index].name}`;
         dropZoneUl.appendChild(liElement);
     }
-    dropZone.querySelector("span").textContent = `${selectedFiles.length} files received`
+    dropZone.querySelector("span").textContent = `${selectedFiles.length} files received`;
     extractButtonInput.disabled = false;
 }
 
-function handleFileDesktop(files) {
-    const first_file = files[0];
-    if ((first_file.type === 'application/x-zip-compressed') && (first_file.size <= 50000000)) {
-        selectedFiles.push(first_file);
-        fileInputFeedback.textContent = '';
-        unhighlight();
-        dropZone.classList.add('received');
-        dropZone.innerHTML = `<span>File received: ${first_file.name}</span>`;
-        extractButtonInput.disabled = false;
-    } else {
-        fileInputFeedback.textContent = "Please upload a .zip file.";
-        unhighlight();
-        dropZone.classList.remove('received');
-        dropZone.innerHTML = `<span>Invalid file type.</span>`;
-        extractButtonInput.disabled = true;
+function invalidFileInputUIHandle(feedback, dropZoneSpanMessage) {
+    fileInputFeedback.textContent = feedback;
+    unhighlight();
+    dropZone.classList.remove('received');
+    dropZone.innerHTML = `<span>${dropZoneSpanMessage}</span>`;
+    extractButtonInput.disabled = true;
+}
+
+function handleJpegFiles(files) {
+    for (let index = 0; index < files.length; index++) {
+        if (files[index].type === 'image/jpeg') {
+            selectedFiles.push(files[index]);
+        } else {
+            selectedFiles = [];
+            invalidFileInputUIHandle("Upload just one file type, .zip or .jpg files.", "Mixed file types.");
+            return;
+        }
+    }
+    validFileInputUIHandle();
+}
+
+function handleSingleZipFile(files) {
+    if (files.length === 1) {
+        const first_file = files[0];
+        const isZip = ((first_file.type === 'application/zip') || (first_file.type === 'application/x-zip-compressed')) && (first_file.size <= 50000000);
+        if (isZip) {
+            zipfile_received = true;
+            selectedFiles.push(first_file);
+            validFileInputUIHandle();
+        }
     }
 }
 
 function handleFileInput(files) {
+    zipfile_received = false;
+    selectedFiles = [];
+    
     if (files.length > 0) {
-        if (isMobile) {
-            handleFileMobile(files);
-        } else {
-            handleFileDesktop(files);
+        for (let index = 0; index < files.length; index++) {
+            const file = files[index];
+            console.log(file.type);
+        }
+        handleSingleZipFile(files);
+        if (!zipfile_received) {
+            handleJpegFiles(files);
         }
     } else {
-        fileInputFeedback.textContent = "No file selected.";
-        dropZone.classList.remove('received');
-        dropZone.innerHTML = `<span>Drag & drop files here or click to select</span>`;
-        extractButtonInput.disabled = true;
+        selectedFiles = [];
+        invalidFileInputUIHandle("No file selected.", "Drag & drop files here or click to select");
     }
 }
 
-
-function setupDropZone(){
-    if (isMobile) {
-        fileInput.setAttribute('accept', 'image/jpeg');
-        fileInput.title = 'Only .jpg files are allowed.';
-        dropZoneText.textContent = 'Drop multiple JPEG images here or click to select';
-        fileInput.setAttribute('multiple', 'multiple');
-    } else {
-        fileInput.setAttribute('accept', '.zip');
-        fileInput.title = 'Only .zip files a allowed.';
-        dropZoneText.textContent = 'Drag & drop .zip file here or click to select';
-        fileInput.removeAttribute('multiple');
+function checkDebugMode() {
+    const urlParameters = new URLSearchParams(window.location.search);
+    debugMode = urlParameters.has("debug");
+    if (debugMode) {
+        debugConsoleContainer.classList.remove("hidden");
+        const originalConsoleLog = console.log;
+        const consoleOutput = document.getElementById("console-output");
+        console.log = function(...args) {
+            consoleOutput.textContent += args + "\n";
+            originalConsoleLog.apply(console, args);
+        };
+        console.log("debug mode active.");
     }
 }
 
@@ -239,11 +232,16 @@ const fileInput = document.getElementById("file-input");
 const dropZone = document.getElementById('drop-zone');
 const dropZoneText = document.getElementById('drop-zone-text');
 const fileInputFeedback = document.getElementById('file-input-feedback');
-const isMobile = window.navigator.userAgent.indexOf("Mobile") != -1;
+const extractFeedback = document.getElementById('extract-feedback');
+const debugConsoleContainer = document.getElementById('console-container');
+
 let selectedFiles = [];
+let zipfile_received = false;
+let debugMode = false;
 
 if (document.readyState === "loading") {
-    setupDropZone();
+    checkDebugMode();
+    console.log(window.navigator.userAgent);
 }
 
 tournamentShortNameInput.addEventListener('input', () => validateInput(tournamentShortNameInput));
@@ -300,7 +298,6 @@ function handleDrop(e) {
 document.getElementById('help-text').addEventListener('click', function() {
     document.getElementById('help-popup').style.display = 'block';
 });
-
 
 document.getElementById('close-popup').addEventListener('click', function() {
     closePopup();
