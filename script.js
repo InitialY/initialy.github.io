@@ -1,5 +1,4 @@
 async function loadPyodideAndPackages() {
-    const loadingBar = document.getElementById("loading-bar");
     const pyodideJS = await loadPyodide();
     
     loadingBar.style.width = "33.33%";
@@ -11,12 +10,18 @@ async function loadPyodideAndPackages() {
     
     await pyodideJS.runPythonAsync(`
         import micropip
-        
         await micropip.install("${wheelUrl}")
     `);
     loadingBar.style.width = "100%";
     loadingBar.classList.add("hidden");
     return pyodideJS;
+}
+
+function restoreFormUI(form) {
+    extractFeedback.textContent = '';
+    loadingIndicator.classList.add('hidden');
+    form.classList.remove('hidden');
+    helpText.classList.remove('hidden');
 }
 
 async function extractZipFile(pyodideJS, dirPath) {
@@ -35,20 +40,17 @@ async function extractZipFile(pyodideJS, dirPath) {
                 elif file_name.endswith('.jpg'):
                     zip_ref.extract(file_name, '${dirPath}')
                     accepted_files += 1
-        js.document.getElementById('extract-feedback').textContent = f'{accepted_files} of {len(zipfile_names)-num_non_files} files accepted.'
-        accepted_files
-        `);
+        accepted_files, len(zipfile_names)-num_non_files
+    `);
 }
 
-async function handleZipFile(pyodideJS, dirPath) {
-    const accepted_files = await extractZipFile(pyodideJS, dirPath);
+async function handleZipFile(pyodideJS, dirPath, form) {
+    let accepted_files_ratio = await extractZipFile(pyodideJS, dirPath);
+    extractFeedback.textContent = `${accepted_files_ratio[0]} of ${accepted_files_ratio[1]} files accepted.`;
     zipfile_received = false;
     
-    if (accepted_files <= 0) {
-        document.getElementById('extract-feedback').textContent = '';
-        loadingIndicator.classList.add('hidden');
-        form.classList.remove('hidden');
-        helpText.classList.remove('hidden');
+    if (accepted_files_ratio[0] <= 0) {
+        restoreFormUI(form);
         
         selectedFiles = [];
         invalidFileInputUIHandle("Make sure the .zip file contains proper .jpg files.", ".zip file does not contain proper files");
@@ -56,46 +58,14 @@ async function handleZipFile(pyodideJS, dirPath) {
     }
 }
 
-async function processData(form) {
-    if (selectedFiles.length === 0) {
-        console.log("No selected files.");
-        return;
-    }
-    
+function transitionToLoadingUI(form) {
     form.classList.add('hidden');
-    const helpText = document.getElementById('help-text');
     helpText.classList.add('hidden');
-    const loadingIndicator = document.getElementById('loading');
     loadingIndicator.classList.remove('hidden');
-    
-    extractFeedback.textContent = "Preparing extraction";
-    
-    const pyodideJS = await loadPyodideAndPackages();
+}
 
-    extractFeedback.textContent = "Preparing images";
-    const dirPath = "/images";
-    pyodideJS.FS.mkdir(dirPath);
-    for (let index = 0; index < selectedFiles.length; index++) {
-        try {
-            const currentFile = selectedFiles[index];
-            const fileData = await currentFile.arrayBuffer();
-            pyodideJS.FS.writeFile(`${dirPath}/${currentFile.name}`, new Uint8Array(fileData));
-        } catch (error) {
-            console.error("Error writing file:", error);
-            return;
-        }
-    }
-    if (zipfile_received) {
-        try {
-            await handleZipFile(pyodideJS, dirPath);
-        } catch (error) {
-            console.error("Cannot extract and handle files in zip", error);
-        }
-    }
-
-    extractFeedback.textContent = "Extracting";
-    const jsExcelFileName = 'NinjalaTournamentStats.xlsx';
-    const excelFileData = await pyodideJS.runPythonAsync(`
+async function callExtractApi(pyodideJS, excelFileName, dirPath) {
+    return await pyodideJS.runPythonAsync(`
         from image_number_extraction.main import create_and_export_single_tournament
         import js
 
@@ -107,7 +77,7 @@ async function processData(form) {
                 tournament_name = js.document.getElementById('tournament-name-input').value,
                 short_name = js.document.getElementById('tournament-short-name-input').value,
                 is_team = js.document.getElementById('toggle-team').checked,
-                excel_file_name = "${jsExcelFileName}"
+                excel_file_name = "${excelFileName}"
             )
             stream = list(stream)
         except Exception as e:
@@ -115,21 +85,85 @@ async function processData(form) {
             stream = None
         stream
     `);
+}
 
+function transitionToErrorUI() {
     loadingIndicator.classList.add('hidden');
+    const errorText = document.createElement("p");
+    errorText.textContent = "The files do not meet the criterias. Reload the page and check out the help link.";
+    errorText.style.textAlign = "center";
+    document.getElementById("content").appendChild(errorText);
+}
+
+function transitionToPyodideErrorUI() {
+    transitionToErrorUI();
+    const paragraph = document.querySelector('div#content p');
+    paragraph.textContent = "Sorry something went wrong preparing the extraction. Reload the page, check out the help link and contact the owner."
+}
+
+async function processData(form) {
+    if (selectedFiles.length === 0) {
+        console.log("No selected files.");
+        return;
+    }
+    
+    transitionToLoadingUI(form);
+    
+    extractFeedback.textContent = "Preparing extraction";
+    let pyodideJS = null;
+    try {
+        pyodideJS = await loadPyodideAndPackages();
+    } catch (error) {
+        console.error("Cannot load pyodide:", error);
+        transitionToPyodideErrorUI();
+        return;
+    } 
+
+    extractFeedback.textContent = "Preparing images";
+    const dirPath = "/images";
+    pyodideJS.FS.mkdir(dirPath);
+    for (let index = 0; index < selectedFiles.length; index++) {
+        const currentFile = selectedFiles[index];
+        try {
+            const fileData = await currentFile.arrayBuffer();
+            pyodideJS.FS.writeFile(`${dirPath}/${currentFile.name}`, new Uint8Array(fileData));
+        } catch (error) {
+            console.error("Error writing file:", error);
+            transitionToErrorUI();
+            return;
+        }
+    }
+    if (zipfile_received) {
+        try {
+            await handleZipFile(pyodideJS, dirPath, form);
+        } catch (error) {
+            console.error("Cannot handle files in zip: ", error);
+            transitionToErrorUI();
+            return;
+        }
+    }
+    
+    extractFeedback.textContent = "Extracting";
+    const jsExcelFileName = 'NinjalaTournamentStats.xlsx';
+    var excelFileData = null;
+    try {
+        excelFileData = await callExtractApi(pyodideJS, jsExcelFileName, dirPath);
+    } catch (error) {
+        console.error("Cannot extract number of files: ", error)
+        transitionToErrorUI();
+        return;
+    }
 
     if (excelFileData != null) {
         const blob = new Blob([new Uint8Array(excelFileData)], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
         
-        const downloadLink = document.getElementById("download-link");
+        loadingIndicator.classList.add('hidden');
         downloadLink.querySelector('a').href = URL.createObjectURL(blob);
         downloadLink.querySelector('a').download = jsExcelFileName;
         downloadLink.classList.remove('hidden');
     } else {
-        const errorText = document.createElement("p");
-        errorText.textContent = "The files do not meet the criterias. Reload the page and check out the help link.";
-        errorText.style.textAlign = "center";
-        document.getElementById("content").appendChild(errorText);
+        transitionToErrorUI();
+        return;
     }
 }
 
@@ -216,12 +250,20 @@ function checkDebugMode() {
     debugMode = urlParameters.has("debug");
     if (debugMode) {
         debugConsoleContainer.classList.remove("hidden");
-        const originalConsoleLog = console.log;
         const consoleOutput = document.getElementById("console-output");
+        
+        const originalConsoleLog = console.log;
         console.log = function(...args) {
             consoleOutput.textContent += args + "\n";
             originalConsoleLog.apply(console, args);
         };
+
+        const originalConsoleError = console.error;
+        console.error = function(...args) {
+            consoleOutput.textContent += args + "\n";
+            originalConsoleLog.apply(console, args);
+        };
+
         console.log("debug mode active.");
     }
 }
@@ -234,6 +276,10 @@ const dropZoneText = document.getElementById('drop-zone-text');
 const fileInputFeedback = document.getElementById('file-input-feedback');
 const extractFeedback = document.getElementById('extract-feedback');
 const debugConsoleContainer = document.getElementById('console-container');
+const helpText = document.getElementById('help-text');
+const loadingIndicator = document.getElementById('loading');
+const loadingBar = document.getElementById("loading-bar");
+const downloadLink = document.getElementById("download-link");
 
 let selectedFiles = [];
 let zipfile_received = false;
@@ -303,7 +349,10 @@ document.getElementById('close-popup').addEventListener('click', function() {
     closePopup();
 });
 
-window.onclick = function(event) {
+window.addEventListener('click', handleClosePopup);
+window.addEventListener('touchstart', handleClosePopup);
+
+function handleClosePopup(event) {
     const popup = document.getElementById('help-popup');
 
     if (event.target === popup) {
@@ -317,5 +366,5 @@ function closePopup() {
 
 document.getElementById("create-tournament-form").addEventListener("submit", async (event) => {
     event.preventDefault();
-    processData(event.target);
+    await processData(event.target);
 });

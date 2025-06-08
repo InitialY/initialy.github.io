@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <script src="https://cdn.jsdelivr.net/pyodide/v0.27.5/full/pyodide.js"></script>
   <link rel="stylesheet" href="styles.css">
   <link rel="shortcut icon" href="#">
@@ -9,6 +9,11 @@
 <body>
   <div id="content">
     <h1>Ninjala&trade; Tournament Statistics Creator</h1>
+    <noscript>
+      <div id="no-script">
+        <p>This Website uses JavaScript. Please enable it or use another browser.</p>
+      </div>
+    </noscript>
     <p id="help-text"><span class="clickable">Click here for help</span></p>
     <form id="create-tournament-form">
       <div class="form-row">
@@ -61,7 +66,7 @@
     <span id="close-popup" class="close-icon">&times;</span> 
     <div class="help-popup-content">
       <h2>How to use</h2>
-      <p>Click on the blue dashed box and upload your screenshots. Your screenshots must be taken with the screenshot capturing feature of the Nintendo Switch System and must not be renamed. The name should look like this:</p>
+      <p>Click on the blue dashed box and upload your screenshots. Your screenshots must be taken with the screenshot capturing feature of the Nintendo Switch System. The capturing feature of the Nintendo Switch 2 has not been tested yet. The screenshots must not be renamed and should look like this:</p>
       <span class="popup-image-file-name">2023040204065400-77C5FCCC39A7B80BD3CF2C480CEBE83C.jpg</span>
       <p>There are two types of images, the website can recognize:</p>
       <figure>
@@ -78,7 +83,7 @@
       <p>After entering valid input values and pressing the "Extract" button, a download link provides an excel file. This file is editable, so you can add more infos if you like. You can also import the file into Google Sheets or LibreOffice Calc. Here is an example:</p>
       <figure>
         <img src="./NinjalaTournamentStats.jpg" alt="Generated Excel File Example">
-        <figcaption>Here is an example Excel File. You can also fill in missing infos.</figcaption>
+        <figcaption>Example Statistics of the "WNA Tours: Saizo Cup (Solo)" Tournament.</figcaption>
       </figure>
       <h2>About</h2>
       <p>You can find more info about this project on <a href="https://github.com/InitialY/initialy.github.io" target="_blank">GitHub.</a></p>
