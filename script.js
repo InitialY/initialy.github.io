@@ -90,7 +90,7 @@ async function callExtractApi(pyodideJS, excelFileName, dirPath) {
 function transitionToErrorUI() {
     loadingIndicator.classList.add('hidden');
     const errorText = document.createElement("p");
-    errorText.textContent = "The files do not meet the criterias. Reload the page and check out the help link.";
+    errorText.textContent = "The files do not meet the criterias. Make sure, to NOT use the Nintendo Switch App to transfer the images. Reload the page and check out the help link for more.";
     errorText.style.textAlign = "center";
     document.getElementById("content").appendChild(errorText);
 }

@@ -331,11 +331,6 @@ figcaption {
   font-size: .8rem;
 }
 
-.popup-image-file-name {
-  font-style: italic;
-  font-weight: 200;
-}
-
 #console-container {
   border: 1px solid #ccc;
   padding: 10px;
