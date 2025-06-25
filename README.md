@@ -1,15 +1,30 @@
 # About
 This is an unofficial project related to the *Nintendo Switch* game **Ninjala™**.
 
-This website is a tool to extract statistical values of given screenshots, and export them as an Excel file.
+The Ninjala Tournament Statistics Creator extracts statistical values of given screenshots, and export them as an Excel file.
 The idea is to evaluate and visualize the results of in-game tournaments held in Ninjala.
+Visit the website to use it: https://initialy.github.io/
 
 ## About Ninjala™
 Ninjala™ is a free-to-play multiplayer action game developed and published by GungHo Online Entertainment for the *Nintendo Switch*.
 Create your own Ninja with various customization options and jump into an online battle with up to 8 player. Choose between a battle royale style and a team battle mode.
 Official Website: https://ninjalathegame.com/en/
 
-# How Does It Work
+# How to use
+Visit the website https://initialy.github.io/, fill in the fields and hit the extract button. Once it's done, you can download a created Excel file. 
+
+In order to use it, you need to participate in Ninjala™ in-game Tournament and capture screenshots after every match of the results.Ninjala Tournaments are mostly held monthly at the end a month. More informations can be found in the Ninjala Wiki: https://ninjala.fandom.com/wiki/Tournaments 
+
+Transfer your screenshots from the Nintendo Switch System to a device, preferably a PC and upload them to the website. Fill in the rest of the fields and hit the extract button.
+
+## Requirements
+* Nintendo Switch console
+* Nintendo-Account
+* Download and install the game Ninjala™ from the E-Shop
+  * Start the game, battle matches until you reach the player level 5
+* You do NOT need an active Nintendo Switch Online membership.
+
+# How does it work
 First, the tool filters and sorts the given screenshots. This happens based on the filename. When capturing screenshots with the Nintendo Switch System, the name always starts with a timestamp. This is very important to keep the correct order among other things. Doubles and screenshots of different games will be taken out based on the timestamp too, or the game identification code, which also is contained in the filename, provided the screenshots are transfered through the Micro SD card.
 
 After filtering and sorting, the images will be paired, so that the right Battle History image and Detailed Result image are together. For this, the images will be categorized with, again, the timestamp and a sample extraction.
