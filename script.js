@@ -207,7 +207,7 @@ function handleJpegFiles(files) {
             selectedFiles.push(files[index]);
         } else {
             selectedFiles = [];
-            invalidFileInputUIHandle("Upload just one file type, .zip or .jpg files.", "Mixed file types.");
+            invalidFileInputUIHandle("Upload just one file type, .zip with .jpg files or just .jpg files.", "Mixed file types.");
             return;
         }
     }
