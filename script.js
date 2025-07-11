@@ -72,7 +72,7 @@ async function callExtractApi(pyodideJS, excelFileName, dirPath) {
         # Call project entry point of the wheel
         stream = None
         try:
-            stream = create_and_export_single_tournament(
+            stream = create_and_export_single_tournament_as_stream(
                 tournament_dir = '${dirPath}',
                 tournament_name = js.document.getElementById('tournament-name-input').value,
                 short_name = js.document.getElementById('tournament-short-name-input').value,
