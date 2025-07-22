@@ -24,38 +24,43 @@ function restoreFormUI(form) {
     helpText.classList.remove('hidden');
 }
 
-async function extractZipFile(pyodideJS, dirPath) {
+async function extractZipFile(pyodideJS) {
     return await pyodideJS.runPythonAsync(`
         import zipfile
-        import js
         
         # Extract the ZIP file
+        filenames = []
         accepted_files = 0
         num_non_files = 0
-        with zipfile.ZipFile('${dirPath}/${selectedFiles[0].name}', 'r') as zip_ref:
-            zipfile_names = zip_ref.namelist()
-            for file_name in zipfile_names:
-                if file_name.endswith('/'):
-                    num_non_files += 1
-                elif file_name.endswith('.jpg'):
-                    zip_ref.extract(file_name, '${dirPath}')
+        with zipfile.ZipFile('${selectedFiles[0].name}', 'r') as zip_file:
+            for file_info in zip_file.infolist():
+                curr_filename = file_info.filename
+                if curr_filename.endswith('.jpg'):
                     accepted_files += 1
-        accepted_files, len(zipfile_names)-num_non_files
+                    filenames.append(curr_filename)
+                    with zip_file.open(file_info) as file:
+                        bytestrings.append(file.read())
+                else:
+                    num_non_files += 1
+        filenames, bytestrings, accepted_files, len(filenames)-num_non_files
     `);
 }
 
-async function handleZipFile(pyodideJS, dirPath, form) {
-    let accepted_files_ratio = await extractZipFile(pyodideJS, dirPath);
-    extractFeedback.textContent = `${accepted_files_ratio[0]} of ${accepted_files_ratio[1]} files accepted.`;
-    zipfile_received = false;
+async function handleZipFile(pyodideJS, form) {
+    let extractReturnValues = await extractZipFile(pyodideJS);
+    selectedFiles = [...extractReturnValues[0]];
+    let byteStrings = extractReturnValues[1];
+    extractFeedback.textContent = `${extractReturnValues[2]} of ${extractReturnValues[3]} files accepted.`;
+    zipfileReceived = false;
     
-    if (accepted_files_ratio[0] <= 0) {
+    if (extractReturnValues[2] <= 0) {
         restoreFormUI(form);
         
         selectedFiles = [];
         invalidFileInputUIHandle("Make sure the .zip file contains proper .jpg files.", ".zip file does not contain proper files");
         return;
     }
+    return byteStrings;
 }
 
 function transitionToLoadingUI(form) {
@@ -64,28 +69,27 @@ function transitionToLoadingUI(form) {
     loadingIndicator.classList.remove('hidden');
 }
 
-async function callExtractApi(pyodideJS, excelFileName, dirPath) {
-    return await pyodideJS.runPythonAsync(`
-        from image_number_extraction.main import create_and_export_single_tournament
-        import js
+let callExtractApiPythonCode = `
+from image_number_extraction.main import create_and_export_single_tournament_as_stream
 
-        # Call project entry point of the wheel
+def call_extract_api(image_filenames, bytestrings, tournament_name, short_name, total_points, is_team, excel_file_name):
+    stream = None
+    try:
+        stream = create_and_export_single_tournament_as_stream(
+            filenames = image_filenames,
+            bytestrings = bytestrings,
+            tournament_name = tournament_name,
+            short_name = short_name,
+            total_points = total_points,
+            is_team = is_team,
+            excel_file_name = excel_file_name
+        )
+        stream = list(stream)
+    except Exception as e:
+        print("Error, files are incorrect.", e)
         stream = None
-        try:
-            stream = create_and_export_single_tournament_as_stream(
-                tournament_dir = '${dirPath}',
-                tournament_name = js.document.getElementById('tournament-name-input').value,
-                short_name = js.document.getElementById('tournament-short-name-input').value,
-                is_team = js.document.getElementById('toggle-team').checked,
-                excel_file_name = "${excelFileName}"
-            )
-            stream = list(stream)
-        except Exception as e:
-            print("Error, files are incorrect.", e)
-            stream = None
-        stream
-    `);
-}
+    return stream
+`;
 
 function transitionToErrorUI() {
     loadingIndicator.classList.add('hidden');
@@ -120,34 +124,48 @@ async function processData(form) {
     } 
 
     extractFeedback.textContent = "Preparing images";
-    const dirPath = "/images";
-    pyodideJS.FS.mkdir(dirPath);
-    for (let index = 0; index < selectedFiles.length; index++) {
-        const currentFile = selectedFiles[index];
+    const byteStrings = [];
+
+    if (zipfileReceived) {
         try {
-            const fileData = await currentFile.arrayBuffer();
-            pyodideJS.FS.writeFile(`${dirPath}/${currentFile.name}`, new Uint8Array(fileData));
-        } catch (error) {
-            console.error("Error writing file:", error);
-            transitionToErrorUI();
-            return;
-        }
-    }
-    if (zipfile_received) {
-        try {
-            await handleZipFile(pyodideJS, dirPath, form);
+            byteStrings = await handleZipFile(pyodideJS, form);
         } catch (error) {
             console.error("Cannot handle files in zip: ", error);
             transitionToErrorUI();
             return;
+        }
+    } else {
+        for (let index = 0; index < selectedFiles.length; index++) {
+            const currentFile = selectedFiles[index];
+            try {
+                const arrayBuffer = await currentFile.arrayBuffer();
+                byteStrings.push(new Uint8Array(arrayBuffer));
+            } catch (error) {
+                console.error("Error writing file:", error);
+                transitionToErrorUI();
+                return;
+            }
         }
     }
     
     extractFeedback.textContent = "Extracting";
     const jsExcelFileName = 'NinjalaTournamentStats.xlsx';
     var excelFileData = null;
+    await pyodideJS.runPythonAsync(callExtractApiPythonCode);
+    // parameters for api call
+    const byteStringsConverted = byteStrings.map(uint8Array => Array.from(uint8Array));
+    const imageFilenames = selectedFiles.map(file => file.name);
+    const tournamentName = document.getElementById('tournament-name-input').value;
+    const shortName = document.getElementById('tournament-short-name-input').value;
+    const totalPoints = 500;
+    const isTeam = document.getElementById('toggle-team').checked;
+
+    let byteStringsConvertedString = JSON.stringify(byteStringsConverted);
+    let imageFilenamesString = JSON.stringify(imageFilenames);
+    let pythonApiCall = `call_extract_api(${imageFilenamesString}, ${byteStringsConvertedString}, ${tournamentName}, ${shortName}, ${totalPoints}, ${isTeam}, ${jsExcelFileName})`;
+
     try {
-        excelFileData = await callExtractApi(pyodideJS, jsExcelFileName, dirPath);
+        excelFileData = await pyodideJS.runPythonAsync(pythonApiCall);
     } catch (error) {
         console.error("Cannot extract number of files: ", error)
         transitionToErrorUI();
@@ -219,7 +237,7 @@ function handleSingleZipFile(files) {
         const first_file = files[0];
         const isZip = ((first_file.type === 'application/zip') || (first_file.type === 'application/x-zip-compressed')) && (first_file.size <= 50000000);
         if (isZip) {
-            zipfile_received = true;
+            zipfileReceived = true;
             selectedFiles.push(first_file);
             validFileInputUIHandle();
         }
@@ -227,7 +245,7 @@ function handleSingleZipFile(files) {
 }
 
 function handleFileInput(files) {
-    zipfile_received = false;
+    zipfileReceived = false;
     selectedFiles = [];
     
     if (files.length > 0) {
@@ -236,7 +254,7 @@ function handleFileInput(files) {
             console.log(file.type);
         }
         handleSingleZipFile(files);
-        if (!zipfile_received) {
+        if (!zipfileReceived) {
             handleJpegFiles(files);
         }
     } else {
@@ -282,7 +300,7 @@ const loadingBar = document.getElementById("loading-bar");
 const downloadLink = document.getElementById("download-link");
 
 let selectedFiles = [];
-let zipfile_received = false;
+let zipfileReceived = false;
 let debugMode = false;
 
 if (document.readyState === "loading") {

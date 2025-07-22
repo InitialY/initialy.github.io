@@ -29,11 +29,11 @@ Once everything is prepared, the extraction can begin. This step does not use th
 
 | Battle History | Detailed Result |
 | -------------- | --------------- |
-| ![Points and Placement in the Battle History are marked](ModifiedBattleHistoryImage.png "Battle History") | ![Drones, K.O.'s and IPPON's in the Detailed Result are marked](ModifiedDetailedResultImage.png "Detailed Result") |
+| ![Points and Placement in the Battle History are marked](assets/ModifiedBattleHistoryImage.png "Battle History") | ![Drones, K.O.'s and IPPON's in the Detailed Result are marked](assets/ModifiedDetailedResultImage.png "Detailed Result") |
 
 The output Excel file contains either two or three charts, depending on the selected tournament format. These charts outline the Points Course, Placement Distribution Frequency, and Win Rate. Since the "Team" tournament format does not have a placement, only the Points Course and Win Rate are included. Here is an example file:
 
-![Excel file output when "Solo" is selected](NinjalaTournamentStats.jpg "Sample Excel file")
+![Excel file output when "Solo" is selected](assets/NinjalaTournamentStats.jpg "Sample Excel file")
 
 ## How do my screenshots have to look like?
 Capturing a screenshot with the Nintendo Switch or Nintendo Switch 2 should adhere to the following properties:
