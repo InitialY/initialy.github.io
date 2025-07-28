@@ -41,14 +41,11 @@ def call_extract_api():
         return image_structure
 
     image_structure_list = list(map(convert_to_bytes, apiParams.imageStructureList))
-    
-    if image_structure_list:
-        print(type(image_structure_list[0]))
 
     stream = None
     try:
         stream = create_and_export_single_tournament_as_stream(
-            image_structure_list = image_structure_list,
+            image_structure_list = [image_structure.to_py() for image_structure in image_structure_list],
             tournament_name = apiParams.tournamentName,
             short_name = apiParams.shortName,
             total_points = apiParams.totalPoints,
