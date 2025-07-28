@@ -36,11 +36,19 @@ from image_number_extraction.main import create_and_export_single_tournament_as_
 def call_extract_api():
     from js import apiParams
 
+    def convert_to_bytes(image_structure):
+        image_structure.imageByteString = bytes(image_structure.imageByteString)
+        return image_structure
+
+    image_structure_list = list(map(convert_to_bytes, apiParams.imageStructureList))
+    
+    if image_structure_list:
+        print(type(image_structure_list[0]))
+
     stream = None
     try:
         stream = create_and_export_single_tournament_as_stream(
-            filenames = apiParams.imageFilenames,
-            bytestrings = [bytes(bytestring) for bytestring in apiParams.bytestrings],
+            image_structure_list = image_structure_list,
             tournament_name = apiParams.tournamentName,
             short_name = apiParams.shortName,
             total_points = apiParams.totalPoints,
@@ -88,8 +96,7 @@ async function processData(form) {
     } 
 
     extractFeedback.textContent = "Preparing images";
-    let byteStrings = [];
-    let fileNames = [];
+    let imageStructureList = [];
 
     if (zipfileReceived) {
         const zip = new JSZip();
@@ -99,7 +106,12 @@ async function processData(form) {
                 fileNames.push(fileName);
                 if (unzipped.files[fileName].name.match(/\.(jpg|jpeg)$/)) {
                     const imageData = await unzipped.files[fileName].async("uint8array");
-                    byteStrings.push(imageData);
+                    imageStructureList.push(
+                        {
+                            imageFileName: fileName, 
+                            imageByteString: Array.from(imageData)
+                        }
+                    );
                 }
             }
         } catch (error) {
@@ -112,14 +124,18 @@ async function processData(form) {
             const currentFile = selectedFiles[index];
             try {
                 const arrayBuffer = await currentFile.arrayBuffer();
-                byteStrings.push(new Uint8Array(arrayBuffer));
+                imageStructureList.push(
+                    {
+                        imageFileName: currentFile.name, 
+                        imageByteString: Array.from(new Uint8Array(arrayBuffer))
+                    }
+                );
             } catch (error) {
                 console.error("Error writing file:", error);
                 transitionToErrorUI();
                 return;
             }
         }
-        fileNames = selectedFiles.map(file => file.name);
     }
     
     extractFeedback.textContent = "Extracting";
@@ -128,8 +144,7 @@ async function processData(form) {
     
     // parameters for api call
     const apiParams = {
-        bytestrings: byteStrings.map(uint8Array => Array.from(uint8Array)),
-        imageFilenames: fileNames,
+        imageStructureList: imageStructureList,
         tournamentName: document.getElementById('tournament-name-input').value,
         shortName: document.getElementById('tournament-short-name-input').value,
         totalPoints: 500,
