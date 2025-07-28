@@ -162,8 +162,10 @@ async function processData(form) {
     }
 
     if (excelFileData != null) {
-        const blob = new Blob([new Uint8Array(excelFileData)], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-        
+        let js_excelFileData = excelFileData.toJs()
+        const blob = new Blob([new Uint8Array(js_excelFileData)], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        excelFileData.destroy();
+
         loadingIndicator.classList.add('hidden');
         downloadLink.querySelector('a').href = URL.createObjectURL(blob);
         downloadLink.querySelector('a').download = jsExcelFileName;
