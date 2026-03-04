@@ -31,27 +31,28 @@ function transitionToLoadingUI(form) {
 }
 
 let callExtractApiPythonCode = `
-from image_number_extraction.main import create_and_export_single_tournament_as_stream
+from image_number_extraction.main import create_tournament_from_stream
+from image_number_extraction.main import export_as_excel_stream
 
 def call_extract_api():
     from js import apiParams
 
-    def convert_to_bytes(image_structure):
-        image_structure.imageByteString = bytes(image_structure.imageByteString)
-        return image_structure
+    def convert_to_bytes(image_dictionary):
+        image_dictionary.imageByteString = bytes(image_dictionary.imageByteString)
+        return image_dictionary
 
-    image_structure_list = list(map(convert_to_bytes, apiParams.imageStructureList))
+    image_dictionaries = list(map(convert_to_bytes, apiParams.imageDictionaries))
 
     stream = None
     try:
-        stream = create_and_export_single_tournament_as_stream(
-            image_structure_list = [image_structure.to_py() for image_structure in image_structure_list],
+        tournament = create_tournament_from_stream(
+            image_dictionaries = [image_dictionary.to_py() for image_dictionary in image_dictionaries],
             tournament_name = apiParams.tournamentName,
             short_name = apiParams.shortName,
             total_points = apiParams.totalPoints,
-            is_team = apiParams.isTeam,
-            excel_file_name = apiParams.excelFileName
+            is_team = apiParams.isTeam
         )
+        stream = export_as_excel_stream(tournaments = [tournament], excel_file_name = apiParams.excelFileName)
         stream = list(stream)
     except Exception as e:
         print("Error, files are incorrect.", e)
@@ -93,7 +94,7 @@ async function processData(form) {
     } 
 
     extractFeedback.textContent = "Preparing images";
-    let imageStructureList = [];
+    let imageDictionaries = [];
 
     if (zipfileReceived) {
         const zip = new JSZip();
@@ -103,7 +104,7 @@ async function processData(form) {
                 fileNames.push(fileName);
                 if (unzipped.files[fileName].name.match(/\.(jpg|jpeg)$/)) {
                     const imageData = await unzipped.files[fileName].async("uint8array");
-                    imageStructureList.push(
+                    imageDictionaries.push(
                         {
                             imageFileName: fileName, 
                             imageByteString: Array.from(imageData)
@@ -121,7 +122,7 @@ async function processData(form) {
             const currentFile = selectedFiles[index];
             try {
                 const arrayBuffer = await currentFile.arrayBuffer();
-                imageStructureList.push(
+                imageDictionaries.push(
                     {
                         imageFileName: currentFile.name, 
                         imageByteString: Array.from(new Uint8Array(arrayBuffer))
@@ -141,7 +142,7 @@ async function processData(form) {
     
     // parameters for api call
     const apiParams = {
-        imageStructureList: imageStructureList,
+        imageDictionaries: imageDictionaries,
         tournamentName: document.getElementById('tournament-name-input').value,
         shortName: document.getElementById('tournament-short-name-input').value,
         totalPoints: 500,
