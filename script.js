@@ -49,7 +49,6 @@ def call_extract_api():
             image_dictionaries = [image_dictionary.to_py() for image_dictionary in image_dictionaries],
             tournament_name = apiParams.tournamentName,
             short_name = apiParams.shortName,
-            total_points = apiParams.totalPoints,
             is_team = apiParams.isTeam
         )
         stream = export_as_excel_stream(tournaments = [tournament], excel_file_name = apiParams.excelFileName)
@@ -145,7 +144,6 @@ async function processData(form) {
         imageDictionaries: imageDictionaries,
         tournamentName: document.getElementById('tournament-name-input').value,
         shortName: document.getElementById('tournament-short-name-input').value,
-        totalPoints: 500,
         isTeam: document.getElementById('toggle-team').checked,
         excelFileName: jsExcelFileName
     };
