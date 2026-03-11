@@ -1,13 +1,13 @@
 async function loadPyodideAndPackages() {
     const pyodideJS = await loadPyodide();
-    
+
     loadingBar.style.width = "33.33%";
     await pyodideJS.loadPackage("micropip");
-    
+
     loadingBar.style.width = "66.66%";
     const wheelFileName = 'image_number_extraction-0.1.0-py3-none-any.whl';
     const wheelUrl = new URL(wheelFileName, window.location.href).href;
-    
+
     await pyodideJS.runPythonAsync(`
         import micropip
         await micropip.install("${wheelUrl}")
@@ -57,7 +57,7 @@ def call_extract_api():
         print("Error, files are incorrect.", e)
         stream = None
     
-    return stream
+    return tournament.get_summary(), stream
 `;
 
 function transitionToErrorUI() {
@@ -79,9 +79,9 @@ async function processData(form) {
         console.log("No selected files.");
         return;
     }
-    
+
     transitionToLoadingUI(form);
-    
+
     extractFeedback.textContent = "Preparing extraction";
     let pyodideJS = null;
     try {
@@ -90,7 +90,7 @@ async function processData(form) {
         console.error("Cannot load pyodide:", error);
         transitionToPyodideErrorUI();
         return;
-    } 
+    }
 
     extractFeedback.textContent = "Preparing images";
     let imageDictionaries = [];
@@ -105,7 +105,7 @@ async function processData(form) {
                     const imageData = await unzipped.files[fileName].async("uint8array");
                     imageDictionaries.push(
                         {
-                            imageFileName: fileName, 
+                            imageFileName: fileName,
                             imageByteString: Array.from(imageData)
                         }
                     );
@@ -123,7 +123,7 @@ async function processData(form) {
                 const arrayBuffer = await currentFile.arrayBuffer();
                 imageDictionaries.push(
                     {
-                        imageFileName: currentFile.name, 
+                        imageFileName: currentFile.name,
                         imageByteString: Array.from(new Uint8Array(arrayBuffer))
                     }
                 );
@@ -134,11 +134,13 @@ async function processData(form) {
             }
         }
     }
-    
+
     extractFeedback.textContent = "Extracting";
     const jsExcelFileName = 'NinjalaTournamentStats.xlsx';
+    var apiReturn = null;
+    var tournamentSummary = null;
     var excelFileData = null;
-    
+
     // parameters for api call
     const apiParams = {
         imageDictionaries: imageDictionaries,
@@ -153,16 +155,23 @@ async function processData(form) {
     let pythonApiCall = `call_extract_api()`;
 
     try {
-        excelFileData = await pyodideJS.runPythonAsync(pythonApiCall);
+        apiReturn = await pyodideJS.runPythonAsync(pythonApiCall);
+        tournamentSummary = apiReturn[0];
+        excelFileData = apiReturn[1];
     } catch (error) {
         console.error("Cannot extract number of files: ", error)
         transitionToErrorUI();
         return;
     }
 
+    if (tournamentSummary != null) {
+        let jsTournamentSummary = tournamentSummary.toJs();
+        createWebStats(jsTournamentSummary);
+    }
+
     if (excelFileData != null) {
-        let js_excelFileData = excelFileData.toJs()
-        const blob = new Blob([new Uint8Array(js_excelFileData)], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        let jsExcelFileData = excelFileData.toJs();
+        const blob = new Blob([new Uint8Array(jsExcelFileData)], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
         excelFileData.destroy();
 
         loadingIndicator.classList.add('hidden');
@@ -173,6 +182,89 @@ async function processData(form) {
         transitionToErrorUI();
         return;
     }
+}
+
+function createWebStats(jsTournamentSummary) {
+    document.getElementById("main-header").classList.add('hidden');
+    document.getElementById("stat-title").textContent = jsTournamentSummary.get('Tournament Name');
+    const spans = [
+        "total-points-span",
+        "played-games-span",
+        "avg-points-span",
+        "highest-gain-span",
+        "highest-loss-span",
+        "avg-ippons-span",
+        "avg-drones-span",
+        "avg-kos-span"
+    ];
+
+    const keys = [
+        'Total Points',
+        'Played Games',
+        'Average Points',
+        'Largest Gain',
+        'Largest Loss',
+        'Average IPPONs',
+        'Average Drones',
+        'Average KOs'
+    ];
+
+    spans.forEach((spanId, index) => {
+        document.getElementById(spanId).textContent = jsTournamentSummary.get(keys[index]);
+    });
+    let winRateSpan = jsTournamentSummary.get('Win Rate');
+    document.getElementById("win-rate-span").textContent = `${winRateSpan[0]} - ${winRateSpan[1]}`;
+
+    const ctx = document.getElementById('myChart').getContext('2d');
+
+    const chartAreaBorder = {
+        id: 'chartAreaBorder',
+        afterDatasetsDraw(chart, args, options) {
+            const { ctx, chartArea: { top, bottom, left, right, width, height } } = chart;
+            ctx.save()
+            ctx.strokeRect(left, top, width - 1, height);
+            ctx.restore();
+        }
+    };
+
+    const myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: Array.from({ length: 42 }, (_, index) => index),
+            datasets: [{
+                label: 'Current Points',
+                data: jsTournamentSummary.get('Current Points'),
+                borderColor: 'rgb(0, 123, 255)',
+                pointBackgroundColor: 'rgb(0, 123, 255)',
+                borderWidth: 2,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        title: function (tooltipItems) {
+                            const xValue = tooltipItems[0].label;
+                            return `Game ${xValue}`;
+                        },
+                        footer: function (tooltipItems) {
+                            const index = tooltipItems[0].dataIndex;
+                            const pointsList = [''].concat(jsTournamentSummary.get('Points'));
+                            return [`Points: ${pointsList[index]}`];
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: { title: { display: true, text: "Game" } },
+                y: { title: { display: true, text: "Points" } }
+            }
+        },
+        plugins: [chartAreaBorder]
+    });
 }
 
 function validateInput(input) {
@@ -237,7 +329,7 @@ function handleSingleZipFile(files) {
 function handleFileInput(files) {
     zipfileReceived = false;
     selectedFiles = [];
-    
+
     if (files.length > 0) {
         for (let index = 0; index < files.length; index++) {
             const file = files[index];
@@ -259,15 +351,15 @@ function checkDebugMode() {
     if (debugMode) {
         debugConsoleContainer.classList.remove("hidden");
         const consoleOutput = document.getElementById("console-output");
-        
+
         const originalConsoleLog = console.log;
-        console.log = function(...args) {
+        console.log = function (...args) {
             consoleOutput.textContent += args + "\n";
             originalConsoleLog.apply(console, args);
         };
 
         const originalConsoleError = console.error;
-        console.error = function(...args) {
+        console.error = function (...args) {
             consoleOutput.textContent += args + "\n";
             originalConsoleLog.apply(console, args);
         };
@@ -349,11 +441,11 @@ function handleDrop(e) {
     unhighlight();
 }
 
-document.getElementById('help-text').addEventListener('click', function() {
+document.getElementById('help-text').addEventListener('click', function () {
     document.getElementById('help-popup').style.display = 'block';
 });
 
-document.getElementById('close-popup').addEventListener('click', function() {
+document.getElementById('close-popup').addEventListener('click', function () {
     closePopup();
 });
 
