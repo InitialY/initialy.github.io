@@ -81,6 +81,10 @@ input[type="text"] {
   font-size: 1rem;
 }
 
+input[type="text"]::placeholder {
+  opacity: 0.5;
+}
+
 .drop-zone {
   border: 0.125rem dashed #007bff;
   border-radius: 0.25rem;
@@ -178,7 +182,7 @@ input[type="submit"]:disabled {
 
 .loading-circle {
   border: 0.5rem solid #f3f3f3;
-  border-top: 0.5rem solid #3498db;
+  border-top: 0.5rem solid #007bff;
   border-radius: 50%;
   width: 3.125rem;
   height: 3.125rem;
@@ -204,7 +208,7 @@ input[type="submit"]:disabled {
     height: 0.7rem;
     width: 0;
     border-radius: 0.2rem;
-    background-color: #3498db;
+    background-color: #007bff;
     transition: width 0.5s ease;
     align-items: center;
 }
@@ -265,17 +269,26 @@ h2 {
 }
 
 
-.info-box {
-  border: 0.125rem solid #007bff;
+.download-button:hover {
+  background-color: #0056b3;
+}
+
+.download-button {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin: auto;
+  color: #fff;
+  text-decoration: none;
   border-radius: 0.25rem;
   padding: 0.75em;
   text-align: center;
-  background-color: #e9f5ff;
+  background-color: #007bff;
 }
 
-.info-box p {
-  display: block;
-  color: #007bff;
+.download-button svg {
+  margin-right: 0.125rem;
 }
 
 @media (max-width: 600px) {
