@@ -243,6 +243,7 @@ h2 {
     padding: 1.25rem;
     text-align: center;
     border: 2px solid #ccc;
+    min-height: 3.25rem;
 }
 
 .grid-item span:first-child {
