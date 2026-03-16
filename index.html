@@ -4,12 +4,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <script src="https://cdn.jsdelivr.net/pyodide/v0.27.5/full/pyodide.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
   <link rel="stylesheet" href="styles.css">
   <link rel="shortcut icon" href="#">
 </head>
 <body>
   <div id="content">
-    <h1>Ninjala&trade; Tournament Statistics Creator</h1>
+    <h1 id="main-header">Ninjala&trade; Tournament Statistics Creator</h1>
     <noscript>
       <div id="no-script">
         <p>This Website uses JavaScript. Please enable it or use another browser.</p>
@@ -59,9 +60,26 @@
       </div>
     </div>
     <div id="download-link" class="hidden">
-      <p>Tournament Statistics successfully created!</p>
-      <a href="#" download>Download Excel File</a>
-    </div>
+      <h2>Tournament Result Overview</h2>
+      <h1 id="stat-title"></h1>
+      <div class="grid-container">
+        <div class="grid-item"><span>Total Points</span><span id="total-points-span"></span></div>
+        <div class="grid-item"><span>Played Games</span><span id="played-games-span"></span></div>
+        <div class="grid-item"><span>Avg Points</span><span id="avg-points-span"></span></div>
+        <div class="grid-item"><span>Highest Gain</span><span id="highest-gain-span"></span></div>
+        <div class="grid-item"><span>Highest Loss</span><span id="highest-loss-span"></span></div>
+        <div class="grid-item"><span>W - L</span><span id="win-rate-span"></span></div>
+        <div class="grid-item"><span>Avg IPPONs</span><span id="avg-ippons-span"></span></div>
+        <div class="grid-item"><span>Avg Drones</span><span id="avg-drones-span"></span></div>
+        <div class="grid-item"><span>Avg KOs</span><span id="avg-kos-span"></span></div>
+      </div>
+      <div class="chart-container">
+        <canvas id="myChart"></canvas>
+      </div>
+      <a class="download-button" href="#" download>
+        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#FFFFFF"><path d="M480-320 280-520l56-58 104 104v-326h80v326l104-104 56 58-200 200ZM240-160q-33 0-56.5-23.5T160-240v-120h80v120h480v-120h80v120q0 33-23.5 56.5T720-160H240Z"/></svg>
+        Download modifiable Excel File
+      </a>
   </div>
   <div id="help-popup" class="help-popup">
     <span id="close-popup" class="close-icon">&times;</span> 
