@@ -37,19 +37,18 @@ from image_number_extraction.main import export_as_excel_stream
 def call_extract_api():
     from js import apiParams
 
-    def convert_to_bytes(image_dictionary):
-        image_dictionary.imageByteString = bytes(image_dictionary.imageByteString)
-        return image_dictionary
+    def convert_to_bytes(image_bytestring):
+        return bytes(image_bytestring)
 
-    image_dictionaries = list(map(convert_to_bytes, apiParams.imageDictionaries))
+    image_bytestrings = list(map(convert_to_bytes, apiParams.imageBytestrings))
 
     stream = None
     try:
         tournament = create_tournament_from_stream(
-            image_dictionaries = [image_dictionary.to_py() for image_dictionary in image_dictionaries],
+            image_bytestrings = image_bytestrings,
             tournament_name = apiParams.tournamentName,
-            short_name = apiParams.shortName,
-            is_team = apiParams.isTeam
+            is_team = apiParams.isTeam,
+            debug = apiParams.debug
         )
         stream = export_as_excel_stream(tournaments = [tournament], excel_file_name = apiParams.excelFileName)
         stream = list(stream)
@@ -93,22 +92,16 @@ async function processData(form) {
     }
 
     extractFeedback.textContent = "Preparing images";
-    let imageDictionaries = [];
+    let imageBytestrings = [];
 
     if (zipfileReceived) {
         const zip = new JSZip();
         try {
             const unzipped = await zip.loadAsync(selectedFiles[0]);
             for (const fileName in unzipped.files) {
-                fileNames.push(fileName);
                 if (unzipped.files[fileName].name.match(/\.(jpg|jpeg)$/)) {
                     const imageData = await unzipped.files[fileName].async("uint8array");
-                    imageDictionaries.push(
-                        {
-                            imageFileName: fileName,
-                            imageByteString: Array.from(imageData)
-                        }
-                    );
+                    imageBytestrings.push(Array.from(imageData));
                 }
             }
         } catch (error) {
@@ -121,12 +114,7 @@ async function processData(form) {
             const currentFile = selectedFiles[index];
             try {
                 const arrayBuffer = await currentFile.arrayBuffer();
-                imageDictionaries.push(
-                    {
-                        imageFileName: currentFile.name,
-                        imageByteString: Array.from(new Uint8Array(arrayBuffer))
-                    }
-                );
+                imageBytestrings.push(Array.from(new Uint8Array(arrayBuffer)));
             } catch (error) {
                 console.error("Error writing file:", error);
                 transitionToErrorUI();
@@ -143,11 +131,11 @@ async function processData(form) {
 
     // parameters for api call
     const apiParams = {
-        imageDictionaries: imageDictionaries,
+        imageBytestrings: imageBytestrings,
         tournamentName: document.getElementById('tournament-name-input').value,
-        shortName: document.getElementById('tournament-short-name-input').value,
         isTeam: document.getElementById('toggle-team').checked,
-        excelFileName: jsExcelFileName
+        excelFileName: jsExcelFileName,
+        debug: debugMode
     };
     window.apiParams = apiParams;
 
@@ -232,7 +220,7 @@ function createWebStats(jsTournamentSummary) {
         data: {
             labels: Array.from({ length: 42 }, (_, index) => index),
             datasets: [{
-                label: 'Current Points',
+                label: 'Points',
                 data: jsTournamentSummary.get('Current Points'),
                 borderColor: 'rgb(0, 123, 255)',
                 pointBackgroundColor: 'rgb(0, 123, 255)',
@@ -253,7 +241,7 @@ function createWebStats(jsTournamentSummary) {
                         footer: function (tooltipItems) {
                             const index = tooltipItems[0].dataIndex;
                             const pointsList = [''].concat(jsTournamentSummary.get('Points'));
-                            return [`Points: ${pointsList[index]}`];
+                            return [`Gains: ${pointsList[index]}`];
                         }
                     }
                 }
@@ -265,16 +253,6 @@ function createWebStats(jsTournamentSummary) {
         },
         plugins: [chartAreaBorder]
     });
-}
-
-function validateInput(input) {
-    if (input.validity.valid) {
-        input.classList.remove('invalid');
-        input.nextElementSibling.textContent = '';
-    } else {
-        input.classList.add('invalid');
-        input.nextElementSibling.textContent = input.title;
-    }
 }
 
 function validFileInputUIHandle() {
@@ -368,7 +346,6 @@ function checkDebugMode() {
     }
 }
 
-const tournamentShortNameInput = document.getElementById("tournament-short-name-input");
 const extractButtonInput = document.getElementById("extract-button");
 const fileInput = document.getElementById("file-input");
 const dropZone = document.getElementById('drop-zone');
@@ -390,7 +367,6 @@ if (document.readyState === "loading") {
     console.log(window.navigator.userAgent);
 }
 
-tournamentShortNameInput.addEventListener('input', () => validateInput(tournamentShortNameInput));
 fileInput.addEventListener('change', (e) => {
     const files = e.target.files;
     handleFileInput(files);
