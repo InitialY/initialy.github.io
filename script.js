@@ -218,7 +218,7 @@ function createWebStats(jsTournamentSummary) {
     const myChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: Array.from({ length: 42 }, (_, index) => index),
+            labels: Array.from({ length: jsTournamentSummary.get('Played Games')+1 }, (_, index) => index),
             datasets: [{
                 label: 'Points',
                 data: jsTournamentSummary.get('Current Points'),
