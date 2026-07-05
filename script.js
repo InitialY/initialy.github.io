@@ -163,9 +163,13 @@ async function processData(form) {
         excelFileData.destroy();
 
         loadingIndicator.classList.add('hidden');
-        downloadLink.querySelector('a').href = URL.createObjectURL(blob);
-        downloadLink.querySelector('a').download = jsExcelFileName;
+        
+        let downloadButton = document.getElementById("download-button")
+        downloadButton.href = URL.createObjectURL(blob);
+        downloadButton.download = jsExcelFileName;
+        
         downloadLink.classList.remove('hidden');
+        downloadLinkContent.classList.remove('hidden');
     } else {
         transitionToErrorUI();
         return;
@@ -357,6 +361,7 @@ const helpText = document.getElementById('help-text');
 const loadingIndicator = document.getElementById('loading');
 const loadingBar = document.getElementById("loading-bar");
 const downloadLink = document.getElementById("download-link");
+const downloadLinkContent = document.getElementById("download-link-content");
 
 let selectedFiles = [];
 let zipfileReceived = false;
@@ -443,4 +448,29 @@ function closePopup() {
 document.getElementById("create-tournament-form").addEventListener("submit", async (event) => {
     event.preventDefault();
     await processData(event.target);
+});
+
+
+const btn = document.getElementById("copy-image-button");
+
+btn.addEventListener("click", async () => {
+  const copyIcon = btn.querySelector(".icon-copy");
+  const checkIcon = btn.querySelector(".icon-check");
+  const label = btn.querySelector(".label");
+
+  const c = document.getElementById("download-link-content");
+  const canvas = await html2canvas(c, {
+    backgroundColor: "#ffffff",
+    scale: window.devicePixelRatio || 2
+  });
+
+  const blob = await new Promise(r => canvas.toBlob(r, "image/png"));
+  if (!blob) return;
+
+  await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+
+  btn.classList.add("is-success");
+  copyIcon.hidden = true;
+  checkIcon.hidden = false;
+  label.textContent = "Copied";
 });
