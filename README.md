@@ -1,7 +1,7 @@
 # About
 This is an unofficial fan project related to the *Nintendo Switch* game **Ninjala™**.
 
-The Ninjala™ Tournament Statistics Creator extracts statistical values from provided screenshots. The created statistics can be seen in web or downloaded as Excel file. The goal is to evaluate and visualize the results of in-game tournaments held in Ninjala™. 
+The Ninjala™ Tournament Statistics Creator extracts statistical values from provided screenshots. The created statistics can be seen and shared from web or downloaded as Excel file. The goal is to evaluate and visualize the results of in-game tournaments held in Ninjala™. 
 
 **Visit the Website to use the Tool: https://initialy.github.io/**
 
@@ -49,7 +49,7 @@ Please refrain from taking a screenshot of a recorded video, whether from the Ni
 The website has been tested with the game set to English, but it will most likely work with other languages, including Japanese, Spanish, French, Italian, and German. Korean and Chinese are not supported, as the in-game font varies.
 
 ## Why is the Nintendo Switch App not supported?
-Filtering, sorting, and pairing occur based on the timestamp. Screenshots uploaded and downloaded from the Nintendo Switch App do have a timestamp; however, the upload date is used instead of the creation date. This leads to an incorrect sorting order and pairing and thus disrupt the statistics. 
+Filtering, sorting, and pairing occur based on the timestamp in the meta data. Screenshots uploaded and downloaded from the Nintendo Switch App do have a timestamp; however, the upload date is used instead of the creation date. This leads to an incorrect sorting order and pairing and thus disrupt the statistics. 
 
 ## Why Excel File?
 When I started collecting and creating the tournament statistics, I used Excel for this purpose. The tool allows values to be added to the file in a way that makes them editable afterward. Missing values can be added later, and they will be considered in the charts, which will dynamically update.
