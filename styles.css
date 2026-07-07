@@ -227,6 +227,7 @@ input[type="submit"]:disabled {
 
 #download-link-content {
   padding: .75rem;
+  padding-top: 0;
 }
 
 #stat-title {
